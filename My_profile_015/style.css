@@ -1,0 +1,110 @@
+*{
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #7F5D99;
+    margin: 0; 
+    padding: 30px 16px;
+    color:rgb(0, 0, 0);
+}
+.profile-card {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 30px;
+    background:repeating-radial-gradient(#B427F5,#DD27F5,#7E00BD) ;
+    border-radius: 16px;
+    box-shadow: 8px 24px rgba(15, 39, 71, 0,12);
+    line-height: 1.8;
+}
+.img {
+    border-radius: 360%;
+    max-width: 300px;
+    margin: auto;
+    padding: 30px;
+    object-position: 50%;
+}
+h1 {
+    color: blue;
+    text-align: center;
+}
+.motto {
+    margin-top: 24px;
+    padding: 16px;
+    background: white;
+    border-left: solid blue;
+    border-radius: 8px;
+}
+button {
+    margin-top: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background: blue;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+button:hover{
+    background: rgb(113, 113, 206);
+}
+#massage, #greetingmassege {
+    color: rgb(43, 214, 226);
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+
+.sparkle-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    user-select: none;
+    animation: sparkle-fly 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes sparkle-fly {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.4) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(var(--dx), var(--dy)) scale(1.3) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--dx), calc(var(--dy) + 30px)) scale(0) rotate(360deg);
+    }
+}
+
+.sparkle-text {
+    animation: text-glow 1.5s ease-in-out infinite alternate;
+    display: inline-block;
+    color: #fffb91 !important;
+    text-shadow: 0 0 10px #ff00ea, 0 0 20px #00ffff, 0 0 30px #ffff00;
+}
+
+@keyframes text-glow {
+    from {
+        text-shadow: 0 0 10px #ff00ea, 0 0 20px #00ffff;
+        transform: scale(1);
+    }
+    to {
+        text-shadow: 0 0 18px #ffff00, 0 0 28px #ff00bb, 0 0 40px #00ffff;
+        transform: scale(1.06);
+    }
+}
+
+.btn-sparkle {
+    animation: btn-pop 0.4s ease-out;
+    box-shadow: 0 0 20px #ff69b4, 0 0 30px #00ffff;
+}
+
+@keyframes btn-pop {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
