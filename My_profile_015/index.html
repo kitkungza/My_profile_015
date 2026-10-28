@@ -3,25 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My profile</title>
+    <title>My Portfolio</title>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
   <body>
-  <main class="profile-card">
-    <center><img id="img" class="img" src="image/IMG_20260430_114834_830.jpg" alt="คนหล่อครับ"></center>
-    <h1>My profile</h1>
-    <P>ชื่อ-นามสกุล <span id="fullname">พงศกร เมืองประเทศ</span></P>
-    <P>ชื่อเล่น <span id="nickname">กิต</span></P>
-    <P>รหัสประจำตัว <span id="studentID">68219010015</span></P>
+    
+    <header class="site-header">
+      <h2>My Portfolio</h2>
+      <nav>
+        <a href="#about">About me</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+      </nav>
+    </header>
 
-    <div class="motto">
-        <h2>คติประจำใจ</h2>
-        <p id="motto">อยากเก่ง ก็ลงมือทำ</p>
-    </div>
+    
+    <main class="profile-card">
+      
+      
+      <section id="about">
+        <div class="img-container">
+          <img id="img" class="img" src="image/IMG_20260430_114834_830.jpg" alt="รูปโปรไฟล์ พงศกร" />
+        </div>
+        <h1>My Profile</h1>
+        <p><strong>ชื่อ-นามสกุล:</strong> <span id="fullname">พงศกร เมืองประเทศ</span></p>
+        <p><strong>ชื่อเล่น:</strong> <span id="nickname">กิต</span></p>
+        <p><strong>รหัสประจำตัว:</strong> <span id="studentID">68219010015</span></p>
 
-    <button id="greetingBtn">ทักทาย</button>
-    <p id="greetingmassege">ยินดีตอนรับพวกเกย์ทั้งหลาย</p>
-</main>
-</body>
+        <div class="motto">
+          <h2>คติประจำใจ</h2>
+          <p id="motto">อยากเก่ง ก็ลงมือทำ</p>
+        </div>
+
+        <button id="greetingBtn">ทักทาย</button>
+        <p id="greetingmassege">ยินดีต้อนรับสู่พอร์ตโฟลิโอของผมครับ</p>
+      </section>
+
+      <hr class="divider" />
+
+      
+      <section id="skills">
+        <h2>Skills ทักษะที่มี</h2>
+        <ul class="skills-list">
+          <li>IoT, Smart Home System, Web Application</li>
+          <li>HTML, CSS, JavaScript, C++, PHP</li>
+          <li>Linux, Windows</li>
+        </ul>
+      </section>
+
+      <hr class="divider" />
+
+     
+      <section id="projects">
+        <h2>Projects ผลงาน</h2>
+        
+        <div class="project-item">
+          <h3>1. ระบบ Smart Farm ด้วย ESP32</h3>
+          <p>พัฒนาโดยมีหน้าเว็บควบคุมและสามารถอ่านค่าเซนเซอร์บนหน้าเว็บที่ไหนก็ได้ พร้อมระบบควบคุมมอเตอร์รดน้ำอัตโนมัติ</p>
+        </div>
+
+        <div class="project-item">
+          <h3>2. เว็บไซต์เรียนรู้ IT Academy</h3>
+          <p>เป็นเว็บไซต์สำหรับเรียนรู้เกี่ยวกับสายงาน IT ทั้ง IoT, Network, Web App และภาษาโปรแกรมมิ่งต่างๆ</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ส่วนท้ายเว็บไซต์ (Footer) -->
+    <footer class="site-footer">
+      <p>&copy; 2026 นายพงศกร เมืองประเทศ (68219010015) - เทคโนโลยีสารสนเทศ</p>
+    </footer>
+  </body>
 </html>

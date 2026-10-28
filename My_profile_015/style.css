@@ -1,62 +1,150 @@
-*{
+* {
     box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: #7F5D99;
     margin: 0; 
-    padding: 30px 16px;
-    color:rgb(0, 0, 0);
+    padding: 0;
+    color: white;
 }
+
+/* 1. แถบ Header และเมนูนำทางด้านบน */
+.site-header {
+    background: #31143e;
+    color: white;
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.site-header h2 {
+    margin: 0;
+    color: #fffb91;
+    font-size: 24px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+
+nav a:hover {
+    background: #B427F5;
+    color: #fffb91;
+}
+
+/* 2. การ์ดเนื้อหาหลัก */
 .profile-card {
-    max-width: 600px;
-    margin: 30px auto;
-    padding: 30px;
-    background:repeating-radial-gradient(#B427F5,#DD27F5,#7E00BD) ;
+    max-width: 650px;
+    margin: 40px auto;
+    padding: 35px;
+    background: repeating-radial-gradient(#B427F5, #DD27F5, #7E00BD);
     border-radius: 16px;
-    box-shadow: 8px 24px rgba(15, 39, 71, 0,12);
+    box-shadow: 0 10px 30px rgba(15, 39, 71, 0.35);
     line-height: 1.8;
 }
-.img {
-    border-radius: 360%;
-    max-width: 300px;
-    margin: auto;
-    padding: 30px;
-    object-position: 50%;
-}
-h1 {
-    color: blue;
+
+.img-container {
     text-align: center;
 }
-.motto {
-    margin-top: 24px;
-    padding: 16px;
-    background: white;
-    border-left: solid blue;
-    border-radius: 8px;
+
+.img {
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.4);
 }
-button {
-    margin-top: 16px;
-    padding: 12px 24px;
+
+h1, h2 {
+    color: #fffb91;
+    text-align: center;
+}
+
+/* 3. กล่องสีขาวสำหรับ คติประจำใจ, ทักษะ และผลงาน (ทำให้อ่านง่ายขึ้น) */
+.motto, .skills-list, .project-item {
+    margin-top: 20px;
+    padding: 18px 24px;
+    background: white;
+    color: #222; /* ตัวหนังสือสีเข้มบนพื้นขาว */
+    border-left: 6px solid blue;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* แก้ปัญหาคำว่า "คติประจำใจ" และหัวข้อผลงานกลืนไปกับพื้นหลังสีขาว */
+.motto h2, .project-item h3 {
+    color: #4A235A;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.skills-list {
+    padding-left: 40px;
+    font-weight: bold;
+}
+
+.divider {
     border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    margin: 35px 0;
+}
+
+/* 4. ปุ่มและข้อความทักทาย */
+button {
+    margin-top: 20px;
+    padding: 12px 28px;
+    border: 2px solid white;
     border-radius: 8px;
     background: blue;
     color: white;
     font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
-button:hover{
-    background: rgb(113, 113, 206);
+
+button:hover {
+    background: rgb(80, 80, 220);
 }
-#massage, #greetingmassege {
-    color: rgb(43, 214, 226);
+
+#greetingmassege {
+    color: #00ffff;
     font-weight: bold;
+    font-size: 18px;
+    margin-top: 12px;
+    min-height: 28px;
     transition: all 0.3s ease;
 }
 
+/* 5. ส่วน Footer */
+.site-footer {
+    text-align: center;
+    padding: 24px;
+    background: #31143e;
+    color: #eee;
+    margin-top: 50px;
+    font-size: 14px;
+}
 
+/* 6. แอนิเมชัน Sparkle (สำคัญ! ป้องกันไม่ให้อิโมจิไปกองรวมกันข้างล่างเว็บ) */
 .sparkle-particle {
     position: fixed;
     pointer-events: none;
@@ -94,7 +182,7 @@ button:hover{
     }
     to {
         text-shadow: 0 0 18px #ffff00, 0 0 28px #ff00bb, 0 0 40px #00ffff;
-        transform: scale(1.06);
+        transform: scale(1.04);
     }
 }
 
