@@ -1,0 +1,428 @@
+/* ==========================================================================
+   My Portfolio - สไตล์ตกแต่งฉบับปรับปรุง (UI/UX Pro Max & Web Design Guidelines)
+   ผู้จัดทำ: พงศกร เมืองประเทศ (กิต) · 68219010015 · ปวช.2 IT 1
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.12) 0%, transparent 45%),
+              radial-gradient(circle at 85% 85%, rgba(126, 34, 206, 0.15) 0%, transparent 45%),
+              #160c24;
+  color: #f3f0f7;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   1. แถบ Header และเมนูนำทางด้านบน (Sticky Navigation)
+   ========================================================================== */
+.site-header {
+  background: rgba(26, 14, 42, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #ffffff;
+  padding: 16px clamp(20px, 4vw, 48px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease;
+}
+
+.site-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+}
+
+nav a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+nav a:hover,
+nav a.active {
+  background: rgba(168, 85, 247, 0.25);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   2. การ์ดเนื้อหาหลัก (Profile Card Container)
+   ========================================================================== */
+.profile-card {
+  width: 92%;
+  max-width: 680px;
+  margin: 40px auto;
+  padding: clamp(28px, 5vw, 44px);
+  background: rgba(38, 20, 60, 0.65);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35), 0 0 35px rgba(168, 85, 247, 0.1);
+  line-height: 1.8;
+}
+
+.img-container {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.img {
+  border-radius: 50%;
+  width: 170px;
+  height: 170px;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 25px rgba(168, 85, 247, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 30px rgba(168, 85, 247, 0.5);
+}
+
+h1 {
+  color: #ffffff;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.02em;
+}
+
+#about > p {
+  font-size: 1.05rem;
+  margin: 12px 0;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+#about > p strong {
+  color: #d8b4fe; /* โทนสีม่วงอ่อนละมุนตา */
+  font-weight: 500;
+  min-width: 110px;
+}
+
+#studentID {
+  font-family: 'Prompt', monospace;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   3. กล่องคติประจำใจ (Motto Box)
+   ========================================================================== */
+.motto {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #c084fc;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.motto h2 {
+  color: #c084fc;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  margin: 0 0 6px 0;
+}
+
+.motto p {
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   4. ปุ่มและข้อความทักทาย (Greeting Interaction)
+   ========================================================================== */
+#greetingBtn {
+  margin-top: 24px;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+  color: #ffffff;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#greetingBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.5);
+}
+
+#greetingBtn:active {
+  transform: translateY(0);
+}
+
+#greetingmassege {
+  color: #7dd3fc; /* สีฟ้าอ่อน สะอาดตา และอ่านง่าย */
+  font-weight: 500;
+  font-size: 1.05rem;
+  margin-top: 14px;
+  min-height: 28px;
+  transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   5. ส่วนทักษะความสามารถ (Skills List)
+   ========================================================================== */
+#skills h2, #projects h2 {
+  color: #ffffff;
+  text-align: left;
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0 0 18px 0;
+}
+
+.skills-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skills-list li {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #38bdf8;
+  border-radius: 10px;
+  padding: 14px 20px;
+  color: #f1f5f9;
+  font-size: 0.98rem;
+  font-weight: 500;
+  line-height: 1.6;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.skills-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateX(4px);
+}
+
+/* ==========================================================================
+   6. ส่วนผลงาน (Projects Showcase)
+   ========================================================================== */
+.project-item {
+  margin-top: 16px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #c084fc;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.project-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.project-item h3 {
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: left;
+  margin: 0 0 10px 0;
+}
+
+.project-item p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ==========================================================================
+   7. เส้นคั่นและส่วนท้ายเว็บไซต์ (Divider & Footer)
+   ========================================================================== */
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  margin: 36px 0;
+}
+
+.site-footer {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(20, 10, 32, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  margin-top: 60px;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   8. แอนิเมชันละอองดาว (Sparkles & Button Glow)
+   ========================================================================== */
+.sparkle-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+  animation: sparkle-fly 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes sparkle-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), calc(var(--dy) + 25px)) scale(0) rotate(360deg);
+  }
+}
+
+.sparkle-text {
+  animation: text-glow 1.2s ease-in-out;
+  display: inline-block;
+  color: #fef08a !important; /* เหลืองนวล สบายตา */
+}
+
+@keyframes text-glow {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.btn-sparkle {
+  animation: btn-pop 0.35s ease-out;
+}
+
+@keyframes btn-pop {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================================================
+   9. การรองรับหน้าจอมือถือ (Responsive Web Design - Media Queries)
+   ========================================================================== */
+@media screen and (max-width: 600px) {
+  .site-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 20px;
+    text-align: center;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  nav a {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .profile-card {
+    width: 94%;
+    margin: 20px auto 40px auto;
+    padding: 24px 18px;
+  }
+
+  .img {
+    width: 140px;
+    height: 140px;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  #about > p {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #about > p strong {
+    min-width: auto;
+  }
+
+  #greetingBtn {
+    width: 100%;
+  }
+
+  .skills-list li, .project-item {
+    padding: 16px;
+  }
+}
+
+/* Accessibility: รองรับผู้ใช้ที่เปิดลดความเคลื่อนไหว (Reduced Motion) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
