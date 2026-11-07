@@ -1124,6 +1124,101 @@ body {
   border-radius: var(--radius-sm);
 }
 
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.project-card-header .project-tag {
+  margin-bottom: 0;
+}
+
+.project-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.project-live-badge:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #34d399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.pulse-dot-green {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-dot-anim 1.8s infinite;
+}
+
+@keyframes pulse-dot-anim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.project-link-header {
+  color: #ffffff;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.project-link-header:hover {
+  color: var(--accent-crimson-bright);
+}
+
+.project-footer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-project-visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.85) 0%, rgba(136, 19, 55, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+  transition: var(--transition-fast);
+}
+
+.btn-project-visit:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.95) 0%, rgba(159, 18, 57, 1) 100%);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.55);
+}
+
+.btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.btn-project-visit:hover .btn-arrow {
+  transform: translate(2px, -2px);
+}
+
 /* Footer */
 .site-footer {
   position: relative;
