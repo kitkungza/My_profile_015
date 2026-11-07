@@ -225,7 +225,6 @@ function createAgentCursor(agent, index) {
   cursorWrap.className = 'swarm-agent-cursor';
   cursorWrap.id = `agent-cursor-${index}`;
 
-  // SVG Pointer with customized theme color
   cursorWrap.innerHTML = `
     <svg class="swarm-cursor-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z" 
@@ -241,7 +240,6 @@ function createAgentCursor(agent, index) {
 
 function initSwarmSimulation() {
   const container = document.getElementById('swarm-cursor-layer');
-  const dock = document.getElementById('swarm-dock');
   const toggleBtn = document.getElementById('swarmToggleBtn');
   const tourBtn = document.getElementById('swarmTourBtn');
   const speedBtn = document.getElementById('swarmSpeedBtn');
@@ -249,11 +247,9 @@ function initSwarmSimulation() {
 
   if (!container) return;
 
-  // Clear existing
   container.innerHTML = '';
   activeAgentInstances = [];
 
-  // Spawn agent cursors across screen
   agentProfiles.forEach((agent, i) => {
     const el = createAgentCursor(agent, i);
     container.appendChild(el);
@@ -274,11 +270,9 @@ function initSwarmSimulation() {
     });
   });
 
-  // Choreography loop
   function stepSwarm() {
     if (!swarmActive) return;
 
-    // Increment layers counter gradually
     if (Math.random() < 0.08 && currentLayerCount < totalLayers) {
       currentLayerCount += Math.floor(Math.random() * 2) + 1;
       if (layerCountEl) {
@@ -294,14 +288,12 @@ function initSwarmSimulation() {
       inst.actionCooldown--;
 
       if (inst.actionCooldown <= 0) {
-        // Pick a new target element or random nearby position
         if (interactiveTargets.length > 0 && Math.random() < 0.65) {
           const target = interactiveTargets[Math.floor(Math.random() * interactiveTargets.length)];
           const rect = target.getBoundingClientRect();
           inst.targetX = rect.left + Math.random() * rect.width;
           inst.targetY = rect.top + Math.random() * rect.height;
 
-          // Occasionally draw a selection box
           if (Math.random() < 0.25) {
             triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
           }
@@ -313,7 +305,6 @@ function initSwarmSimulation() {
         inst.actionCooldown = Math.floor(Math.random() * 80 + 40) / swarmSpeed;
       }
 
-      // Smooth step towards target
       inst.x += (inst.targetX - inst.x) * (inst.speed * swarmSpeed);
       inst.y += (inst.targetY - inst.y) * (inst.speed * swarmSpeed);
 
@@ -325,7 +316,6 @@ function initSwarmSimulation() {
 
   requestAnimationFrame(stepSwarm);
 
-  // Trigger floating dashed selection box
   function triggerSelectionBox(x, y, w, h) {
     if (!swarmActive) return;
     const box = document.createElement('div');
@@ -341,12 +331,8 @@ function initSwarmSimulation() {
     }, 1400 / swarmSpeed);
   }
 
-  // Toggle button listener
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', toggleSwarm);
-  }
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleSwarm);
 
-  // Speed button listener
   if (speedBtn) {
     speedBtn.addEventListener('click', () => {
       if (swarmSpeed === 1) swarmSpeed = 2;
@@ -356,7 +342,6 @@ function initSwarmSimulation() {
     });
   }
 
-  // Tour mode listener
   if (tourBtn) {
     tourBtn.addEventListener('click', () => {
       isTouring = !isTouring;
@@ -365,11 +350,8 @@ function initSwarmSimulation() {
     });
   }
 
-  // Keyboard shortcut Esc or Alt+Shift+S
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      toggleSwarm();
-    } else if (e.altKey && e.shiftKey && (e.key === 'S' || e.key === 's')) {
+    if (e.key === 'Escape' || (e.altKey && e.shiftKey && (e.key === 'S' || e.key === 's'))) {
       toggleSwarm();
     }
   });
@@ -412,9 +394,151 @@ function startTourScroll() {
   }, 4500);
 }
 
+/* ==========================================================================
+   Part 3: Interactions, Web Audio Chime, Sparkles & Greeting Typewriter
+   ========================================================================== */
+let audioMuted = false;
+let audioCtx = null;
+let greetingIndex = 0;
+let typingTimer = null;
+
+const devGreetings = [
+  'สวัสดีครับ! ยินดีที่ได้รู้จักครับ ✨💻',
+  'ขอบคุณที่แวะมาชมพอร์ตโฟลิโอของผมนะครับ 🚀🔥',
+  'กำลังมองหานักพัฒนาเว็บและระบบ IoT อยู่ใช่ไหมครับ? ⚡🌟',
+  'อยากเก่ง ก็ต้องลงมือทำ! มาสร้างโปรเจกต์เจ๋งๆ กันครับ 💖✨',
+  'ระบบ Smart Farm ESP32 และ IT Academy พร้อมต่อยอดครับ 🌿🤖'
+];
+
+function playChimeSound(freq = 587.33, duration = 0.28) {
+  if (audioMuted) return;
+
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + duration);
+
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (err) {
+    // Ignore autoplay restriction warnings
+  }
+}
+
+function createSparkles(x, y) {
+  const count = 24;
+  const symbols = ['✨', '💻', '🚀', '⚡', '🌟', '🔥', '💫'];
+  const colors = ['#e11d48', '#38bdf8', '#c084fc', '#fef08a', '#ffffff', '#4ade80'];
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('span');
+    p.className = 'sparkle-particle';
+
+    if (Math.random() > 0.4) {
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      p.style.fontSize = `${Math.random() * 12 + 14}px`;
+    } else {
+      const size = Math.random() * 8 + 4;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.borderRadius = '50%';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.background = color;
+      p.style.boxShadow = `0 0 10px ${color}`;
+    }
+
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = Math.random() * 130 + 30;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
+    p.style.setProperty('--dx', `${dx}px`);
+    p.style.setProperty('--dy', `${dy}px`);
+
+    document.body.appendChild(p);
+
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+
+function typeWriter(text, element, speed = 25) {
+  if (typingTimer) clearInterval(typingTimer);
+  element.textContent = '';
+  let i = 0;
+
+  typingTimer = setInterval(() => {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+    } else {
+      clearInterval(typingTimer);
+    }
+  }, speed);
+}
+
+function handleGreetingAction(event) {
+  const msgEl = document.getElementById('greetingmassege');
+  const greeting = devGreetings[greetingIndex];
+  greetingIndex = (greetingIndex + 1) % devGreetings.length;
+
+  if (msgEl) {
+    typeWriter(greeting, msgEl);
+  }
+
+  const rect = event.target.getBoundingClientRect();
+  createSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  playChimeSound(659.25, 0.35); // E5 note chime
+}
+
+function initInteractions() {
+  const greetingBtn = document.getElementById('greetingBtn');
+  const heroGreeting = document.getElementById('heroGreetingTrigger');
+  const audioToggleBtn = document.getElementById('audioToggleBtn');
+  const swarmSoundBtn = document.getElementById('swarmSoundBtn');
+
+  if (greetingBtn) greetingBtn.addEventListener('click', handleGreetingAction);
+  if (heroGreeting) heroGreeting.addEventListener('click', (e) => {
+    handleGreetingAction(e);
+    const aboutSection = document.getElementById('about');
+    if (aboutSection) aboutSection.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  const toggleAudio = () => {
+    audioMuted = !audioMuted;
+    const icon = audioMuted ? '🔇' : '🔊';
+    if (audioToggleBtn) audioToggleBtn.textContent = icon;
+    if (swarmSoundBtn) swarmSoundBtn.textContent = icon;
+  };
+
+  if (audioToggleBtn) audioToggleBtn.addEventListener('click', toggleAudio);
+  if (swarmSoundBtn) swarmSoundBtn.addEventListener('click', toggleAudio);
+}
+
 // Initial boot
 document.addEventListener('DOMContentLoaded', () => {
   initThreeBackground();
   initParallax();
   initSwarmSimulation();
+  initInteractions();
 });
