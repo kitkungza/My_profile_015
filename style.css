@@ -589,11 +589,77 @@ body {
   pointer-events: none;
   border-radius: 4px;
   animation: box-blink 1.2s infinite;
+  z-index: 101;
 }
 
 @keyframes box-blink {
-  0%, 100% { opacity: 0.8; }
+  0%, 100% { opacity: 0.9; }
   50% { opacity: 0.3; }
+}
+
+/* ==========================================================================
+   Progressive Assembly States (Build-on-Load & Build-on-Scroll)
+   ========================================================================== */
+.swarm-pending-build {
+  opacity: 0 !important;
+  transform: translateY(32px) scale(0.96) !important;
+  filter: blur(10px) !important;
+  pointer-events: none !important;
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hero-3d-text.swarm-pending-build {
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.9) !important;
+  filter: blur(14px) !important;
+}
+
+.hero-portrait-wrap.swarm-pending-build {
+  opacity: 0 !important;
+  transform: translateX(-50%) translateY(60px) scale(0.92) !important;
+  filter: blur(12px) !important;
+}
+
+.swarm-building {
+  outline: 2px dashed var(--accent-crimson) !important;
+  outline-offset: 6px !important;
+  box-shadow: 0 0 25px rgba(225, 29, 72, 0.45) !important;
+}
+
+.swarm-built {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  filter: blur(0) !important;
+  pointer-events: auto !important;
+  animation: element-assembled 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-3d-text.swarm-built {
+  opacity: 0.85 !important;
+  filter: drop-shadow(0 0 35px rgba(185, 28, 28, 0.35)) !important;
+  animation: none !important;
+}
+
+.hero-portrait-wrap.swarm-built {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
+@keyframes element-assembled {
+  0% {
+    transform: scale(0.95) translateY(10px);
+    filter: brightness(1.3);
+  }
+  60% {
+    transform: scale(1.02) translateY(-2px);
+    filter: brightness(1.1);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    filter: brightness(1);
+  }
 }
 
 /* ==========================================================================

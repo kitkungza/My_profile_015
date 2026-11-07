@@ -1,7 +1,7 @@
 import asyncio
 from playwright.async_api import async_playwright
 
-async def capture():
+async def verify_scroll_build():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(viewport={"width": 1440, "height": 900})
@@ -12,28 +12,39 @@ async def capture():
 
         url = "file:///C:/Users/asus/Downloads/My_profile_015/index.html"
         await page.goto(url, wait_until="networkidle")
-        await page.wait_for_timeout(2000)
 
-        # Take full page screenshot and viewport screenshot
-        await page.screenshot(path="C:/Users/asus/Downloads/My_profile_015/screenshot_hero.png")
-        await page.screenshot(path="C:/Users/asus/Downloads/My_profile_015/screenshot_full.png", full_page=True)
+        # 1. Check initial load (Hero assembly underway)
+        await page.wait_for_timeout(600)
+        hero_built = await page.evaluate("document.querySelector('.hero-3d-text').classList.contains('swarm-built')")
+        print(f"Hero 3D text built at 600ms: {hero_built}")
+
+        # Wait for full Hero assembly
+        await page.wait_for_timeout(1000)
+        await page.screenshot(path="C:/Users/asus/Downloads/My_profile_015/screenshot_assembled_hero.png")
+
+        # 2. Scroll down into About & Skills
+        await page.evaluate("window.scrollTo({ top: 800, behavior: 'smooth' })")
+        await page.wait_for_timeout(800)
+        about_built = await page.evaluate("document.querySelector('.profile-details-card').classList.contains('swarm-built')")
+        print(f"About card assembled on scroll: {about_built}")
+
+        # 3. Scroll down into Projects
+        await page.evaluate("window.scrollTo({ top: 1600, behavior: 'smooth' })")
+        await page.wait_for_timeout(800)
+        projects_built = await page.evaluate("document.querySelector('.project-card').classList.contains('swarm-built')")
+        print(f"Project card assembled on scroll: {projects_built}")
+
+        # Layer counter at end
+        layer_text = await page.text_content("#swarm-layer-count")
+        print(f"Final layer counter: {layer_text}")
+
+        await page.screenshot(path="C:/Users/asus/Downloads/My_profile_015/screenshot_scroll_build.png")
 
         print(f"Console errors: {len(console_errors)}")
         for err in console_errors:
             print("ERROR:", err)
 
-        # Check element visibility
-        bg_text = await page.is_visible(".hero-3d-text")
-        portrait = await page.is_visible(".hero-portrait")
-        swarm_dock = await page.is_visible("#swarm-dock")
-        agents = await page.locator(".swarm-agent-cursor").count()
-
-        print(f"Hero 3D Text visible: {bg_text}")
-        print(f"Hero Portrait visible: {portrait}")
-        print(f"Swarm Dock visible: {swarm_dock}")
-        print(f"Active Swarm Agents count: {agents}")
-
         await browser.close()
 
 if __name__ == "__main__":
-    asyncio.run(capture())
+    asyncio.run(verify_scroll_build())

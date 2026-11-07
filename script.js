@@ -3,7 +3,8 @@
    Features:
    - Part 1: Three.js 3D Ambient Particles & Mouse Depth Parallax
    - Part 2: Viral AI Swarm Agents Simulation Engine (TikTok Replication)
-   - Part 3: Web Audio Synthesizer, Sparkles, and Greeting Typewriter
+   - Part 3: Progressive Assembly Choreography (Build-on-Load & Build-on-Scroll)
+   - Part 4: Web Audio Synthesizer, Sparkles, and Greeting Typewriter
    ========================================================================== */
 
 // Global 3D State
@@ -193,7 +194,7 @@ function initParallax() {
 let swarmActive = true;
 let swarmSpeed = 1; // 1x, 2x, 3x
 let isTouring = false;
-let currentLayerCount = 38;
+let currentLayerCount = 0;
 const totalLayers = 364;
 
 // 18 Distinct Agent Personas
@@ -238,12 +239,29 @@ function createAgentCursor(agent, index) {
   return cursorWrap;
 }
 
+function triggerSelectionBox(x, y, w, h) {
+  if (!swarmActive) return;
+  const container = document.getElementById('swarm-cursor-layer');
+  if (!container) return;
+
+  const box = document.createElement('div');
+  box.className = 'swarm-box-indicator';
+  box.style.left = `${x}px`;
+  box.style.top = `${y}px`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  container.appendChild(box);
+
+  setTimeout(() => {
+    box.remove();
+  }, 1400 / swarmSpeed);
+}
+
 function initSwarmSimulation() {
   const container = document.getElementById('swarm-cursor-layer');
   const toggleBtn = document.getElementById('swarmToggleBtn');
   const tourBtn = document.getElementById('swarmTourBtn');
   const speedBtn = document.getElementById('swarmSpeedBtn');
-  const layerCountEl = document.getElementById('swarm-layer-count');
 
   if (!container) return;
 
@@ -273,13 +291,6 @@ function initSwarmSimulation() {
   function stepSwarm() {
     if (!swarmActive) return;
 
-    if (Math.random() < 0.08 && currentLayerCount < totalLayers) {
-      currentLayerCount += Math.floor(Math.random() * 2) + 1;
-      if (layerCountEl) {
-        layerCountEl.textContent = `${currentLayerCount} / ${totalLayers} layers`;
-      }
-    }
-
     const interactiveTargets = document.querySelectorAll(
       '.hero-title, .hero-subtitle, .stat-card, .btn-primary, .skill-category-card, .project-card, .brand-logo, .nav-link'
     );
@@ -294,7 +305,7 @@ function initSwarmSimulation() {
           inst.targetX = rect.left + Math.random() * rect.width;
           inst.targetY = rect.top + Math.random() * rect.height;
 
-          if (Math.random() < 0.25) {
+          if (Math.random() < 0.20) {
             triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
           }
         } else {
@@ -315,21 +326,6 @@ function initSwarmSimulation() {
   }
 
   requestAnimationFrame(stepSwarm);
-
-  function triggerSelectionBox(x, y, w, h) {
-    if (!swarmActive) return;
-    const box = document.createElement('div');
-    box.className = 'swarm-box-indicator';
-    box.style.left = `${x}px`;
-    box.style.top = `${y}px`;
-    box.style.width = `${w}px`;
-    box.style.height = `${h}px`;
-    container.appendChild(box);
-
-    setTimeout(() => {
-      box.remove();
-    }, 1400 / swarmSpeed);
-  }
 
   if (toggleBtn) toggleBtn.addEventListener('click', toggleSwarm);
 
@@ -395,7 +391,144 @@ function startTourScroll() {
 }
 
 /* ==========================================================================
-   Part 3: Interactions, Web Audio Chime, Sparkles & Greeting Typewriter
+   Part 3: Progressive Assembly Choreography (Build-on-Load & Build-on-Scroll)
+   ========================================================================== */
+function assembleElement(el) {
+  if (!el || el.classList.contains('swarm-built')) return;
+
+  el.classList.remove('swarm-pending-build');
+  el.classList.add('swarm-building');
+
+  const rect = el.getBoundingClientRect();
+  const layerCountEl = document.getElementById('swarm-layer-count');
+
+  // Direct 2-4 agents to fly immediately to this assembling element
+  if (activeAgentInstances.length > 0) {
+    const agentsToDirect = Math.min(3, activeAgentInstances.length);
+    for (let i = 0; i < agentsToDirect; i++) {
+      const agentInst = activeAgentInstances[(i * 4 + Math.floor(Math.random() * 3)) % activeAgentInstances.length];
+      if (agentInst) {
+        agentInst.targetX = rect.left + Math.random() * Math.max(rect.width, 40);
+        agentInst.targetY = rect.top + Math.random() * Math.max(rect.height, 40);
+        agentInst.actionCooldown = 60;
+      }
+    }
+  }
+
+  // Draw selection wireframe box around element
+  if (rect.width > 0 && rect.height > 0) {
+    triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
+  }
+
+  setTimeout(() => {
+    el.classList.remove('swarm-building');
+    el.classList.add('swarm-built');
+
+    // Update layer count incrementally
+    currentLayerCount = Math.min(totalLayers, currentLayerCount + 33);
+    if (layerCountEl) {
+      layerCountEl.textContent = `${currentLayerCount} / ${totalLayers} layers`;
+    }
+
+    playChimeSound(520 + Math.random() * 240, 0.2);
+  }, 260 / swarmSpeed);
+}
+
+function setupProgressiveBuild() {
+  const elementsToBuild = [
+    // 1. Hero group (Assembles on initial load sequentially)
+    { sel: '.hero-3d-text', group: 'hero', delay: 120 },
+    { sel: '.hero-portrait-wrap', group: 'hero', delay: 420 },
+    { sel: '.hero-left', group: 'hero', delay: 780 },
+    { sel: '.stats-grid', group: 'hero', delay: 1100 },
+    { sel: '.hero-downloads', group: 'hero', delay: 1350 },
+    // 2. About section group (Assembles on scroll)
+    { sel: '.profile-details-card', group: 'about', delay: 80 },
+    { sel: '.motto-greeting-card', group: 'about', delay: 280 },
+    // 3. Skills section group (Assembles on scroll)
+    { sel: '.skill-category-card:nth-child(1)', group: 'skills', delay: 80 },
+    { sel: '.skill-category-card:nth-child(2)', group: 'skills', delay: 260 },
+    { sel: '.skill-category-card:nth-child(3)', group: 'skills', delay: 440 },
+    // 4. Projects section group (Assembles on scroll)
+    { sel: '.project-card:nth-child(1)', group: 'projects', delay: 80 },
+    { sel: '.project-card:nth-child(2)', group: 'projects', delay: 300 }
+  ];
+
+  const layerCountEl = document.getElementById('swarm-layer-count');
+
+  // Mark all elements as pending build initially
+  elementsToBuild.forEach(item => {
+    const el = document.querySelector(item.sel);
+    if (el) {
+      el.classList.add('swarm-pending-build');
+      el.dataset.buildGroup = item.group;
+      el.dataset.buildDelay = item.delay;
+    }
+  });
+
+  currentLayerCount = 0;
+  if (layerCountEl) {
+    layerCountEl.textContent = `0 / ${totalLayers} layers`;
+  }
+
+  // 1. Assemble Hero section elements on load
+  const heroElements = document.querySelectorAll('[data-build-group="hero"]');
+  heroElements.forEach(el => {
+    const delay = parseInt(el.dataset.buildDelay || '0', 10);
+    setTimeout(() => {
+      assembleElement(el);
+    }, delay);
+  });
+
+  // 2. Build-on-Scroll via IntersectionObserver
+  if ('IntersectionObserver' in window) {
+    const scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          if (!el.classList.contains('swarm-built')) {
+            const delay = parseInt(el.dataset.buildDelay || '0', 10);
+            setTimeout(() => {
+              assembleElement(el);
+            }, delay);
+            scrollObserver.unobserve(el);
+          }
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -40px 0px',
+      threshold: 0.12
+    });
+
+    const scrollElements = document.querySelectorAll('.swarm-pending-build:not([data-build-group="hero"])');
+    scrollElements.forEach(el => scrollObserver.observe(el));
+  }
+
+  // 3. Active Mouse Scroll Wheel Listener (The swarm rushes to build as you scroll)
+  window.addEventListener('scroll', () => {
+    const pending = document.querySelectorAll('.swarm-pending-build');
+    pending.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 60) {
+        assembleElement(el);
+      }
+    });
+  }, { passive: true });
+
+  // Safety net: ensure everything is fully built after 8 seconds
+  setTimeout(() => {
+    document.querySelectorAll('.swarm-pending-build').forEach(el => {
+      el.classList.remove('swarm-pending-build');
+      el.classList.add('swarm-built');
+    });
+    if (layerCountEl) {
+      layerCountEl.textContent = `${totalLayers} / ${totalLayers} layers`;
+    }
+  }, 8000);
+}
+
+/* ==========================================================================
+   Part 4: Interactions, Web Audio Chime, Sparkles & Greeting Typewriter
    ========================================================================== */
 let audioMuted = false;
 let audioCtx = null;
@@ -540,5 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initThreeBackground();
   initParallax();
   initSwarmSimulation();
+  setupProgressiveBuild();
   initInteractions();
 });
