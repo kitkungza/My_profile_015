@@ -7,6 +7,23 @@
    - Part 4: Web Audio Synthesizer, Sparkles, and Greeting Typewriter
    ========================================================================== */
 
+// Force page to always start at the very top (Hero Section) on reload/refresh
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+// Reset scroll to top instantly
+window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+// Clear hash on reload so user starts fresh at the hero section
+if (window.location.hash) {
+  history.replaceState(null, document.title, window.location.pathname + window.location.search);
+}
+
+window.addEventListener('beforeunload', () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+});
+
 // Global 3D State
 let threeScene, threeCamera, threeRenderer, particleSystem;
 let targetMouseX = 0, targetMouseY = 0;
@@ -872,9 +889,14 @@ function initInteractions() {
 
 // Initial boot
 document.addEventListener('DOMContentLoaded', () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   initThreeBackground();
   initParallax();
   initSwarmSimulation();
   setupProgressiveBuild();
   initInteractions();
+});
+
+window.addEventListener('load', () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 });
