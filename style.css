@@ -193,6 +193,18 @@ body {
   padding: 40px clamp(20px, 4vw, 56px);
 }
 
+/* 2.5D Hero Stage Container */
+.hero-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
 /* Layer 2: Giant 3D Background Typography */
 .hero-3d-text {
   position: absolute;
@@ -630,20 +642,25 @@ body {
 
 .swarm-built {
   opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
   filter: blur(0) !important;
   pointer-events: auto !important;
+}
+
+.swarm-built:not(.hero-3d-text):not(.hero-portrait-wrap) {
+  transform: translateY(0) scale(1) !important;
   animation: element-assembled 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .hero-3d-text.swarm-built {
   opacity: 0.85 !important;
+  transform: translate(-50%, -50%);
   filter: drop-shadow(0 0 35px rgba(185, 28, 28, 0.35)) !important;
   animation: none !important;
 }
 
 .hero-portrait-wrap.swarm-built {
   opacity: 1 !important;
+  transform: translateX(-50%);
   animation: none !important;
 }
 
@@ -972,82 +989,430 @@ body {
 }
 
 /* ==========================================================================
-   6. Responsive Web Design (Media Queries)
+   6. Responsive Web Design (Tablets, iPads & Mobile)
    ========================================================================== */
-@media (max-width: 1024px) {
+
+/* Tablet & iPad (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .site-header {
+    padding: 14px 28px;
+    gap: 16px;
+  }
+
+  .brand-logo {
+    font-size: 1.4rem;
+  }
+
+  .brand-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .hero-section {
+    min-height: 85vh;
+    padding: 30px 28px;
+    align-items: flex-end;
+  }
+
+  .hero-3d-text {
+    font-size: clamp(6rem, 18vw, 11rem);
+    top: 45%;
+  }
+
+  .hero-portrait-wrap {
+    width: clamp(340px, 46vw, 440px);
+  }
+
   .hero-container {
+    align-items: flex-end;
+    padding-bottom: 24px;
+  }
+
+  .hero-col {
+    max-width: 320px;
+  }
+
+  .hero-title {
+    font-size: 2.6rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .hero-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .stat-card {
+    padding: 10px 14px;
+  }
+
+  .stat-num {
+    font-size: 1.8rem;
+  }
+
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile & Small Tablet (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Compact Header */
+  .site-header {
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(8, 8, 10, 0.9);
+  }
+
+  .header-brand {
+    gap: 6px;
+  }
+
+  .brand-logo {
+    font-size: 1.25rem;
+  }
+
+  .brand-badge {
+    display: none; /* Hide long badge on mobile */
+  }
+
+  .header-actions {
+    order: 2;
+    gap: 8px;
+  }
+
+  .btn-nav-cta {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+  }
+
+  .header-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-link {
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Hero Section: Vertical Stage Flow */
+  .hero-section {
+    display: flex;
     flex-direction: column;
-    gap: 40px;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: auto;
+    padding: 16px 16px 64px 16px;
+    overflow: visible;
+  }
+
+  .hero-container {
+    display: contents;
   }
 
   .hero-col {
     max-width: 100%;
   }
 
-  .hero-left, .hero-right {
+  .hero-left {
+    display: contents;
+  }
+
+  .hero-intro-text {
+    order: 1;
     text-align: center;
-    align-items: center;
-  }
-
-  .hero-actions {
-    justify-content: center;
-  }
-
-  .stat-card {
-    text-align: center;
-    border-right: none;
-    border-top: 3px solid var(--accent-crimson);
-  }
-
-  .stats-grid {
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  .hero-portrait-wrap {
-    width: clamp(280px, 46vw, 420px);
-    opacity: 0.85;
-  }
-}
-
-@media (max-width: 768px) {
-  .site-header {
+    display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 12px 20px;
+    align-items: center;
+    margin-bottom: 4px;
+    width: 100%;
   }
 
-  .hero-section {
-    min-height: auto;
-    padding-top: 60px;
-    padding-bottom: 80px;
+  .handwritten-accent {
+    font-size: 1.05rem;
+    margin-bottom: 2px;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 7.5vw, 2.7rem);
+    line-height: 1.05;
+  }
+
+  .hero-subtitle {
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    margin: 3px 0 6px 0;
+  }
+
+  .hero-desc {
+    font-size: 0.84rem;
+    line-height: 1.45;
+    margin-bottom: 6px;
+    max-width: 340px;
+  }
+
+  /* The 2.5D Hero Stage in the Center */
+  .hero-stage {
+    position: relative;
+    width: 100%;
+    height: clamp(250px, 36vh, 320px);
+    order: 2;
+    margin: 4px 0 10px 0;
+    overflow: visible;
+    pointer-events: none;
   }
 
   .hero-3d-text {
-    font-size: clamp(4.5rem, 24vw, 8rem);
-    top: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(3.4rem, 16vw, 4.6rem);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 25px rgba(185, 28, 28, 0.45));
+    z-index: 2;
+    white-space: nowrap;
+    text-align: center;
   }
 
   .hero-portrait-wrap {
-    position: relative;
-    left: auto;
-    transform: none;
-    margin: 20px auto 30px auto;
-    width: 260px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(200px, 60vw, 260px);
+    opacity: 1;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .hero-portrait {
+    width: 100%;
+    height: auto;
+    max-height: clamp(240px, 35vh, 310px);
+    object-fit: contain;
+  }
+
+  /* CTA Group below stage */
+  .hero-cta-group {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .location-tag {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+  }
+
+  /* Right column / Stats */
+  .hero-right {
+    order: 4;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quote-text {
+    font-size: 0.95rem;
+    margin-bottom: 14px;
+  }
+
+  .quote-sub {
+    font-size: 0.78rem;
   }
 
   .stats-grid {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 18px;
   }
 
+  .stat-card {
+    padding: 10px 6px;
+    text-align: center;
+    border-right: none;
+    border-top: 2px solid var(--accent-crimson);
+    border-radius: var(--radius-sm);
+  }
+
+  .stat-num {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+
+  .btn-download {
+    font-size: 0.8rem;
+    padding: 8px 16px;
+  }
+
+  /* Content Cards */
+  .content-wrapper {
+    padding: 20px 14px 100px 14px;
+  }
+
+  .section-card {
+    padding: 22px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-size: 1.45rem;
+  }
+
+  .about-grid, .skills-grid, .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .profile-details-card, .motto-greeting-card, .skill-category-card, .project-card {
+    padding: 18px 14px;
+  }
+
+  .motto-text {
+    font-size: 1.05rem;
+  }
+
+  /* Floating Swarm Dock */
   .swarm-dock {
-    width: 90%;
-    justify-content: space-between;
-    padding: 8px 12px;
+    width: auto;
+    max-width: 95%;
     bottom: 12px;
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .dock-agent-count {
+    font-size: 0.72rem;
+  }
+
+  .dock-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
   }
 
   .dock-layers {
+    display: none;
+  }
+}
+
+/* Very Small Mobile (< 380px, e.g. Galaxy A55 in narrow split, Galaxy Z Fold cover, iPhone SE) */
+@media (max-width: 380px) {
+  .hero-title {
+    font-size: 1.95rem;
+  }
+
+  .hero-3d-text {
+    font-size: clamp(3rem, 16vw, 4rem);
+  }
+
+  .hero-portrait-wrap {
+    width: 220px;
+  }
+
+  .hero-portrait {
+    max-height: 270px;
+  }
+
+  .hero-actions {
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-actions .btn {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    flex: 0 1 auto;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .stat-card {
+    padding: 6px 4px;
+  }
+
+  .stat-num {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+  }
+
+  .swarm-dock {
+    padding: 4px 8px;
+    gap: 4px;
+    bottom: 8px;
+  }
+
+  .dock-agent-count {
+    font-size: 0.68rem;
+  }
+
+  .dock-btn {
+    padding: 3px 6px;
+    font-size: 0.68rem;
+  }
+
+  #swarmToggleBtn {
     display: none;
   }
 }

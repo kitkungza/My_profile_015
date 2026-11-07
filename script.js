@@ -183,6 +183,18 @@ function initParallax() {
       if (e.gamma !== null && e.beta !== null) {
         targetMouseX = Math.min(Math.max(e.gamma / 30, -1), 1);
         targetMouseY = Math.min(Math.max((e.beta - 45) / 30, -1), 1);
+
+        if (bgText) {
+          const moveX = targetMouseX * -12;
+          const moveY = targetMouseY * -8;
+          bgText.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+        }
+
+        if (portraitWrap) {
+          const moveX = targetMouseX * 10;
+          const moveY = targetMouseY * 6;
+          portraitWrap.style.transform = `translateX(calc(-50% + ${moveX}px)) translateY(${moveY}px)`;
+        }
       }
     }, { passive: true });
   }
@@ -437,10 +449,11 @@ function assembleElement(el) {
 function setupProgressiveBuild() {
   const elementsToBuild = [
     // 1. Hero group (Assembles on initial load sequentially)
-    { sel: '.hero-3d-text', group: 'hero', delay: 120 },
-    { sel: '.hero-portrait-wrap', group: 'hero', delay: 420 },
-    { sel: '.hero-left', group: 'hero', delay: 780 },
-    { sel: '.stats-grid', group: 'hero', delay: 1100 },
+    { sel: '.hero-3d-text', group: 'hero', delay: 100 },
+    { sel: '.hero-portrait-wrap', group: 'hero', delay: 350 },
+    { sel: '.hero-intro-text', group: 'hero', delay: 650 },
+    { sel: '.hero-cta-group', group: 'hero', delay: 900 },
+    { sel: '.stats-grid', group: 'hero', delay: 1150 },
     { sel: '.hero-downloads', group: 'hero', delay: 1350 },
     // 2. About section group (Assembles on scroll)
     { sel: '.profile-details-card', group: 'about', delay: 80 },
@@ -496,26 +509,26 @@ function setupProgressiveBuild() {
         }
       });
     }, {
-      rootMargin: '0px 0px -40px 0px',
-      threshold: 0.12
+      rootMargin: '0px 0px 100px 0px',
+      threshold: 0.05
     });
 
     const scrollElements = document.querySelectorAll('.swarm-pending-build:not([data-build-group="hero"])');
     scrollElements.forEach(el => scrollObserver.observe(el));
   }
 
-  // 3. Active Mouse Scroll Wheel Listener (The swarm rushes to build as you scroll)
+  // 3. Active Mouse Scroll Wheel & Touch Scroll Listener
   window.addEventListener('scroll', () => {
     const pending = document.querySelectorAll('.swarm-pending-build');
     pending.forEach(el => {
       const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight - 60) {
+      if (rect.top < window.innerHeight + 80) {
         assembleElement(el);
       }
     });
   }, { passive: true });
 
-  // Safety net: ensure everything is fully built after 8 seconds
+  // Safety net: ensure all elements are visible after 4 seconds
   setTimeout(() => {
     document.querySelectorAll('.swarm-pending-build').forEach(el => {
       el.classList.remove('swarm-pending-build');
@@ -524,7 +537,7 @@ function setupProgressiveBuild() {
     if (layerCountEl) {
       layerCountEl.textContent = `${totalLayers} / ${totalLayers} layers`;
     }
-  }, 8000);
+  }, 4000);
 }
 
 /* ==========================================================================
