@@ -338,6 +338,19 @@ function initSwarmSimulation() {
   }
 
   requestAnimationFrame(stepSwarm);
+  initSwarmControls();
+}
+
+let swarmControlsInitialized = false;
+
+function initSwarmControls() {
+  if (swarmControlsInitialized) return;
+  swarmControlsInitialized = true;
+
+  const toggleBtn = document.getElementById('swarmToggleBtn');
+  const tourBtn = document.getElementById('swarmTourBtn');
+  const speedBtn = document.getElementById('swarmSpeedBtn');
+  const replayBtn = document.getElementById('swarmReplayBtn');
 
   if (toggleBtn) toggleBtn.addEventListener('click', toggleSwarm);
 
@@ -356,6 +369,10 @@ function initSwarmSimulation() {
       tourBtn.classList.toggle('active', isTouring);
       if (isTouring) startTourScroll();
     });
+  }
+
+  if (replayBtn) {
+    replayBtn.addEventListener('click', replayAssembly);
   }
 
   window.addEventListener('keydown', (e) => {
@@ -403,68 +420,241 @@ function startTourScroll() {
 }
 
 /* ==========================================================================
-   Part 3: Progressive Assembly Choreography (Build-on-Load & Build-on-Scroll)
+   Part 3: Progressive Assembly Choreography (Realistic Drag & Drop Builder)
    ========================================================================== */
+let warpOutTimer = null;
+
+function triggerSnapEffect(x, y, w, h) {
+  const container = document.getElementById('swarm-cursor-layer');
+  if (!container) return;
+
+  const ripple = document.createElement('div');
+  ripple.className = 'swarm-snap-ripple';
+  ripple.style.left = `${x}px`;
+  ripple.style.top = `${y}px`;
+  ripple.style.width = `${w}px`;
+  ripple.style.height = `${h}px`;
+  container.appendChild(ripple);
+
+  if (typeof createSparkleBurst === 'function') {
+    createSparkleBurst(x + w / 2, y + h / 2, 8);
+  }
+
+  setTimeout(() => ripple.remove(), 550);
+}
+
+function checkBuildCompletion() {
+  const pending = document.querySelectorAll('.swarm-pending-build');
+  const building = document.querySelectorAll('.swarm-building');
+  const layerCountEl = document.getElementById('swarm-layer-count');
+  const statusDot = document.querySelector('.dock-status-dot');
+  const replayBtn = document.getElementById('swarmReplayBtn');
+  const toggleBtn = document.getElementById('swarmToggleBtn');
+  const agentCountEl = document.querySelector('.dock-agent-count');
+
+  if (pending.length === 0 && building.length === 0) {
+    if (layerCountEl) {
+      layerCountEl.textContent = `${totalLayers} / ${totalLayers} layers`;
+    }
+    if (statusDot) {
+      statusDot.classList.add('completed');
+    }
+    if (agentCountEl) {
+      agentCountEl.textContent = 'All layers compiled ✨';
+    }
+    if (replayBtn) {
+      replayBtn.style.display = 'inline-flex';
+    }
+    if (toggleBtn) {
+      toggleBtn.style.display = 'none';
+    }
+
+    // Agents gracefully disappear after finishing building the website
+    clearTimeout(warpOutTimer);
+    warpOutTimer = setTimeout(() => {
+      disperseSwarmAgents();
+    }, 1200);
+  }
+}
+
+function disperseSwarmAgents() {
+  if (activeAgentInstances.length === 0) return;
+
+  activeAgentInstances.forEach((inst, idx) => {
+    setTimeout(() => {
+      if (inst.el) {
+        inst.el.classList.add('agent-warp-out');
+      }
+    }, idx * 25);
+  });
+
+  setTimeout(() => {
+    const container = document.getElementById('swarm-cursor-layer');
+    if (container) container.innerHTML = '';
+    activeAgentInstances = [];
+    swarmActive = false;
+  }, 900);
+}
+
+function ensureAgentsActive() {
+  if (!swarmActive || activeAgentInstances.length === 0) {
+    swarmActive = true;
+    const statusDot = document.querySelector('.dock-status-dot');
+    if (statusDot) statusDot.classList.remove('completed');
+    const agentCountEl = document.querySelector('.dock-agent-count');
+    if (agentCountEl) agentCountEl.textContent = '18 agents active';
+    initSwarmSimulation();
+  }
+}
+
 function assembleElement(el) {
   if (!el || el.classList.contains('swarm-built')) return;
+
+  ensureAgentsActive();
 
   el.classList.remove('swarm-pending-build');
   el.classList.add('swarm-building');
 
   const rect = el.getBoundingClientRect();
+  const componentName = el.dataset.buildName || 'Component';
+  const layerContainer = document.getElementById('swarm-cursor-layer');
   const layerCountEl = document.getElementById('swarm-layer-count');
 
-  // Direct 2-4 agents to fly immediately to this assembling element
+  if (rect.width <= 0 || rect.height <= 0) {
+    el.classList.remove('swarm-building');
+    el.classList.add('swarm-built');
+    checkBuildCompletion();
+    return;
+  }
+
+  // 1. Pick a primary builder agent
+  let builder = null;
   if (activeAgentInstances.length > 0) {
-    const agentsToDirect = Math.min(3, activeAgentInstances.length);
-    for (let i = 0; i < agentsToDirect; i++) {
-      const agentInst = activeAgentInstances[(i * 4 + Math.floor(Math.random() * 3)) % activeAgentInstances.length];
-      if (agentInst) {
-        agentInst.targetX = rect.left + Math.random() * Math.max(rect.width, 40);
-        agentInst.targetY = rect.top + Math.random() * Math.max(rect.height, 40);
-        agentInst.actionCooldown = 60;
-      }
+    builder = activeAgentInstances[Math.floor(Math.random() * activeAgentInstances.length)];
+  }
+
+  const startX = builder ? builder.x : (rect.left + (Math.random() > 0.5 ? 120 : -120));
+  const startY = builder ? builder.y : (rect.top - 60);
+
+  // 2. Blueprint Ghost
+  const ghost = document.createElement('div');
+  ghost.className = 'swarm-drag-ghost';
+  ghost.style.left = `${startX}px`;
+  ghost.style.top = `${startY}px`;
+  ghost.style.width = `${rect.width}px`;
+  ghost.style.height = `${rect.height}px`;
+  ghost.innerHTML = `<div class="swarm-ghost-pill">◫ &lt;${componentName}&gt; ${Math.round(rect.width)}×${Math.round(rect.height)}</div>`;
+
+  // 3. Smart crosshair alignment guides
+  const guideX = document.createElement('div');
+  guideX.className = 'swarm-smart-guide-x';
+  guideX.style.top = `${rect.top + rect.height / 2}px`;
+
+  const guideY = document.createElement('div');
+  guideY.className = 'swarm-smart-guide-y';
+  guideY.style.left = `${rect.left + rect.width / 2}px`;
+
+  if (layerContainer) {
+    layerContainer.appendChild(ghost);
+    layerContainer.appendChild(guideX);
+    layerContainer.appendChild(guideY);
+  }
+
+  // Direct builder agent
+  if (builder) {
+    builder.targetX = rect.left + rect.width * 0.25;
+    builder.targetY = rect.top + 12;
+    builder.actionCooldown = 80;
+    const badge = builder.el.querySelector('.swarm-agent-badge');
+    if (badge) badge.textContent = `${builder.agent.name} (Dragging ⤓)`;
+  }
+
+  // Helper agent for smart alignment
+  if (activeAgentInstances.length > 1) {
+    const helper = activeAgentInstances.find(a => a !== builder);
+    if (helper) {
+      helper.targetX = rect.right - 20;
+      helper.targetY = rect.bottom - 10;
+      helper.actionCooldown = 60;
+      const hBadge = helper.el.querySelector('.swarm-agent-badge');
+      if (hBadge) hBadge.textContent = `${helper.agent.name} (Aligning)`;
     }
   }
 
-  // Draw selection wireframe box around element
-  if (rect.width > 0 && rect.height > 0) {
-    triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
-  }
+  // Animate ghost to target position
+  requestAnimationFrame(() => {
+    ghost.style.transform = `translate(${rect.left - startX}px, ${rect.top - startY}px)`;
+  });
 
+  const dragDuration = 280 / swarmSpeed;
   setTimeout(() => {
+    triggerSnapEffect(rect.left, rect.top, rect.width, rect.height);
+    playChimeSound(600 + Math.random() * 220, 0.16);
+
+    ghost.remove();
+    guideX.remove();
+    guideY.remove();
+
     el.classList.remove('swarm-building');
     el.classList.add('swarm-built');
 
-    // Update layer count incrementally
+    if (builder) {
+      const badge = builder.el.querySelector('.swarm-agent-badge');
+      if (badge) {
+        badge.textContent = `${builder.agent.name} (✓ Placed)`;
+        setTimeout(() => {
+          if (badge) badge.textContent = builder.agent.name;
+        }, 400);
+      }
+    }
+
     currentLayerCount = Math.min(totalLayers, currentLayerCount + 33);
     if (layerCountEl) {
       layerCountEl.textContent = `${currentLayerCount} / ${totalLayers} layers`;
     }
 
-    playChimeSound(520 + Math.random() * 240, 0.2);
-  }, 260 / swarmSpeed);
+    checkBuildCompletion();
+  }, dragDuration);
+}
+
+function replayAssembly() {
+  clearTimeout(warpOutTimer);
+  const elements = document.querySelectorAll('[data-build-group]');
+  elements.forEach(el => {
+    el.classList.remove('swarm-built', 'swarm-building');
+    el.classList.add('swarm-pending-build');
+  });
+
+  const replayBtn = document.getElementById('swarmReplayBtn');
+  const toggleBtn = document.getElementById('swarmToggleBtn');
+  const statusDot = document.querySelector('.dock-status-dot');
+  if (replayBtn) replayBtn.style.display = 'none';
+  if (toggleBtn) toggleBtn.style.display = 'inline-block';
+  if (statusDot) statusDot.classList.remove('completed');
+
+  ensureAgentsActive();
+  setupProgressiveBuild();
 }
 
 function setupProgressiveBuild() {
   const elementsToBuild = [
     // 1. Hero group (Assembles on initial load sequentially)
-    { sel: '.hero-3d-text', group: 'hero', delay: 100 },
-    { sel: '.hero-portrait-wrap', group: 'hero', delay: 350 },
-    { sel: '.hero-intro-text', group: 'hero', delay: 650 },
-    { sel: '.hero-cta-group', group: 'hero', delay: 900 },
-    { sel: '.stats-grid', group: 'hero', delay: 1150 },
-    { sel: '.hero-downloads', group: 'hero', delay: 1350 },
+    { sel: '.hero-3d-text', group: 'hero', name: 'Typography: 3D PORTFOLIO', delay: 120 },
+    { sel: '.hero-portrait-wrap', group: 'hero', name: 'Avatar: 2.5D Studio Halo', delay: 420 },
+    { sel: '.hero-intro-text', group: 'hero', name: 'Bio: Developer Intro', delay: 780 },
+    { sel: '.hero-cta-group', group: 'hero', name: 'Actions: CTA & Location', delay: 1100 },
+    { sel: '.stats-grid', group: 'hero', name: 'Stats: Metrics Grid', delay: 1400 },
+    { sel: '.hero-downloads', group: 'hero', name: 'Download: CV Resume', delay: 1650 },
     // 2. About section group (Assembles on scroll)
-    { sel: '.profile-details-card', group: 'about', delay: 80 },
-    { sel: '.motto-greeting-card', group: 'about', delay: 280 },
+    { sel: '.profile-details-card', group: 'about', name: 'Card: Profile Info', delay: 80 },
+    { sel: '.motto-greeting-card', group: 'about', name: 'Card: Motto & Greeting', delay: 280 },
     // 3. Skills section group (Assembles on scroll)
-    { sel: '.skill-category-card:nth-child(1)', group: 'skills', delay: 80 },
-    { sel: '.skill-category-card:nth-child(2)', group: 'skills', delay: 260 },
-    { sel: '.skill-category-card:nth-child(3)', group: 'skills', delay: 440 },
+    { sel: '.skill-category-card:nth-child(1)', group: 'skills', name: 'Skills: IoT & Hardware', delay: 80 },
+    { sel: '.skill-category-card:nth-child(2)', group: 'skills', name: 'Skills: Frontend Web', delay: 260 },
+    { sel: '.skill-category-card:nth-child(3)', group: 'skills', name: 'Skills: Tools & Database', delay: 440 },
     // 4. Projects section group (Assembles on scroll)
-    { sel: '.project-card:nth-child(1)', group: 'projects', delay: 80 },
-    { sel: '.project-card:nth-child(2)', group: 'projects', delay: 300 }
+    { sel: '.project-card:nth-child(1)', group: 'projects', name: 'Project: Smart Farm ESP32', delay: 80 },
+    { sel: '.project-card:nth-child(2)', group: 'projects', name: 'Project: IT Academy Hub', delay: 300 }
   ];
 
   const layerCountEl = document.getElementById('swarm-layer-count');
@@ -475,6 +665,7 @@ function setupProgressiveBuild() {
     if (el) {
       el.classList.add('swarm-pending-build');
       el.dataset.buildGroup = item.group;
+      el.dataset.buildName = item.name;
       el.dataset.buildDelay = item.delay;
     }
   });
@@ -528,16 +719,14 @@ function setupProgressiveBuild() {
     });
   }, { passive: true });
 
-  // Safety net: ensure all elements are visible after 4 seconds
+  // Safety net: ensure all elements are visible after 8 seconds
   setTimeout(() => {
     document.querySelectorAll('.swarm-pending-build').forEach(el => {
       el.classList.remove('swarm-pending-build');
       el.classList.add('swarm-built');
     });
-    if (layerCountEl) {
-      layerCountEl.textContent = `${totalLayers} / ${totalLayers} layers`;
-    }
-  }, 4000);
+    checkBuildCompletion();
+  }, 8000);
 }
 
 /* ==========================================================================

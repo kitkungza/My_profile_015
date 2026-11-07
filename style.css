@@ -232,7 +232,7 @@ body {
   will-change: transform;
 }
 
-/* Layer 3: Foreground Transparent Cutout Portrait */
+/* Layer 3: Foreground Transparent Cutout Portrait with Studio Halo */
 .hero-portrait-wrap {
   position: absolute;
   bottom: 0;
@@ -247,12 +247,79 @@ body {
   will-change: transform;
 }
 
+/* Circular Realistic Profile Frame & Studio Halo */
+.portrait-halo-frame {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(280px, 38vw, 470px);
+  height: clamp(280px, 38vw, 470px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.halo-outer-glow {
+  position: absolute;
+  inset: -24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.42) 0%, rgba(225, 29, 72, 0.12) 50%, transparent 72%);
+  filter: blur(28px);
+  opacity: 0.9;
+  animation: halo-pulse 4.5s ease-in-out infinite alternate;
+}
+
+.halo-specular-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.75) 0%, 
+    rgba(225, 29, 72, 0.95) 25%, 
+    rgba(136, 19, 55, 0.4) 60%, 
+    rgba(255, 255, 255, 0.4) 85%, 
+    rgba(225, 29, 72, 0.85) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  box-shadow: 0 0 35px rgba(225, 29, 72, 0.5), inset 0 0 20px rgba(225, 29, 72, 0.35);
+  z-index: 2;
+}
+
+.halo-backdrop-disc {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 30%, 
+    #2c0d16 0%, 
+    #17050a 45%, 
+    #0d0c11 75%, 
+    #08080a 100%
+  );
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.95),
+    inset 0 0 30px rgba(225, 29, 72, 0.22),
+    0 35px 80px rgba(0, 0, 0, 0.9),
+    0 10px 30px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+@keyframes halo-pulse {
+  0% { transform: scale(0.97); opacity: 0.75; }
+  100% { transform: scale(1.03); opacity: 1; }
+}
+
 .hero-portrait {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: auto;
   max-height: 82vh;
   object-fit: contain;
-  filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 25px rgba(225, 29, 72, 0.25));
+  filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 25px rgba(225, 29, 72, 0.35));
   user-select: none;
 }
 
@@ -599,7 +666,7 @@ body {
   border: 1.5px dashed var(--accent-crimson);
   background: rgba(225, 29, 72, 0.08);
   pointer-events: none;
-  border-radius: 4px;
+  border-radius: 6px;
   animation: box-blink 1.2s infinite;
   z-index: 101;
 }
@@ -607,6 +674,121 @@ body {
 @keyframes box-blink {
   0%, 100% { opacity: 0.9; }
   50% { opacity: 0.3; }
+}
+
+/* Realistic Drag & Drop Ghost Component & Smart Alignment Guides */
+.swarm-drag-ghost {
+  position: fixed;
+  z-index: 105;
+  border: 2px dashed rgba(225, 29, 72, 0.85);
+  background: rgba(225, 29, 72, 0.1);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  pointer-events: none;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(225, 29, 72, 0.35);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease-out;
+  animation: ghost-pulse 0.7s infinite alternate;
+}
+
+.swarm-ghost-pill {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 14, 20, 0.95);
+  border: 1px solid rgba(225, 29, 72, 0.6);
+  color: #fca5a5;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.swarm-smart-guide-x {
+  position: fixed;
+  left: 0;
+  width: 100vw;
+  height: 1px;
+  border-top: 1px dashed rgba(56, 189, 248, 0.6);
+  pointer-events: none;
+  z-index: 104;
+}
+
+.swarm-smart-guide-y {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 1px;
+  border-left: 1px dashed rgba(56, 189, 248, 0.6);
+  pointer-events: none;
+  z-index: 104;
+}
+
+.swarm-snap-ripple {
+  position: fixed;
+  border-radius: 8px;
+  border: 2px solid var(--accent-crimson-bright);
+  box-shadow: 0 0 35px var(--accent-crimson), inset 0 0 15px rgba(225, 29, 72, 0.4);
+  pointer-events: none;
+  z-index: 106;
+  animation: snap-ripple 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes snap-ripple {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.08); opacity: 0; }
+}
+
+@keyframes ghost-pulse {
+  0% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+/* Agent Dispersal Animation (Agents Vanish Upon Build Completion) */
+.swarm-agent-cursor.agent-warp-out {
+  transform: scale(0) translateY(-25px) !important;
+  opacity: 0 !important;
+  filter: blur(10px) brightness(2) !important;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.5s ease-out,
+              filter 0.5s ease-out !important;
+}
+
+.swarm-agent-cursor.agent-warp-in {
+  animation: agent-warp-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes agent-warp-in {
+  0% { transform: scale(0); opacity: 0; filter: blur(8px); }
+  70% { transform: scale(1.15); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.dock-status-dot.completed {
+  background: #10b981 !important;
+  box-shadow: 0 0 12px #10b981, 0 0 20px rgba(16, 185, 129, 0.6) !important;
+}
+
+.dock-btn.btn-replay {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.85) 0%, rgba(136, 19, 55, 0.95) 100%);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  animation: replay-glow 2s infinite alternate;
+}
+
+@keyframes replay-glow {
+  0% { box-shadow: 0 0 6px rgba(225, 29, 72, 0.3); }
+  100% { box-shadow: 0 0 18px rgba(225, 29, 72, 0.85); }
 }
 
 /* ==========================================================================
@@ -1028,6 +1210,11 @@ body {
     width: clamp(340px, 46vw, 440px);
   }
 
+  .portrait-halo-frame {
+    width: clamp(280px, 38vw, 370px);
+    height: clamp(280px, 38vw, 370px);
+  }
+
   .hero-container {
     align-items: flex-end;
     padding-bottom: 24px;
@@ -1213,6 +1400,12 @@ body {
     pointer-events: none;
   }
 
+  .portrait-halo-frame {
+    width: clamp(190px, 56vw, 240px);
+    height: clamp(190px, 56vw, 240px);
+    bottom: 2%;
+  }
+
   .hero-portrait {
     width: 100%;
     height: auto;
@@ -1361,6 +1554,11 @@ body {
 
   .hero-portrait-wrap {
     width: 220px;
+  }
+
+  .portrait-halo-frame {
+    width: 190px;
+    height: 190px;
   }
 
   .hero-portrait {
