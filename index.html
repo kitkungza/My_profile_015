@@ -3,81 +3,257 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Portfolio - พงศกร เมืองประเทศ</title>
-    <!-- Google Fonts: ฟอนต์ Prompt ภาษาไทยอ่านง่าย สวยงาม ทันสมัย -->
+    <title>PONGSATORN • Web & IoT Developer Portfolio (IT 1)</title>
+    
+    <!-- Google Fonts: Prompt, Bebas Neue, Space Grotesk -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Three.js CDN for 3D Background Lighting & Particles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
   <body>
-    
-    <!-- แถบ Header และเมนูนำทางด้านบน -->
+    <!-- Three.js Canvas Layer for 3D Depth & Particle Lighting -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Cursor Swarm Simulation Layer (TikTok Viral Replication) -->
+    <div id="swarm-cursor-layer" aria-hidden="true"></div>
+
+    <!-- Navigation Header -->
     <header class="site-header">
-      <h2>My Portfolio</h2>
-      <nav>
-        <a href="#about">About me</a>
-        <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
+      <div class="header-brand">
+        <a href="#hero" class="brand-logo">PONGSATORN <span class="brand-dot">•</span></a>
+        <span class="brand-badge">IT & IOT DEVELOPER</span>
+      </div>
+      <nav class="header-nav">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#projects" class="nav-link">Projects</a>
       </nav>
+      <div class="header-actions">
+        <button id="audioToggleBtn" class="icon-btn" title="Toggle Ambient Audio" aria-label="Toggle Audio">🔊</button>
+        <a href="#about" class="btn-nav-cta">Let's Talk ↗</a>
+      </div>
     </header>
 
-    <!-- การ์ดเนื้อหาหลักของพอร์ตโฟลิโอ -->
-    <main class="profile-card">
-      
-      <!-- ส่วนข้อมูลส่วนตัว (About Me) -->
-      <section id="about">
-        <div class="img-container">
-          <img id="img" class="img" src="image/IMG_20260430_114834_830.jpg" alt="รูปโปรไฟล์ พงศกร" />
-        </div>
-        <h1>My Profile</h1>
-        <p><strong>ชื่อ-นามสกุล:</strong> <span id="fullname">พงศกร เมืองประเทศ</span></p>
-        <p><strong>ชื่อเล่น:</strong> <span id="nickname">กิต</span></p>
-        <p><strong>รหัสประจำตัว:</strong> <span id="studentID">68219010015</span></p>
+    <!-- Hero Section: 2.5D Depth Effect & Cutout Overlapping 3D "PORTFOLIO" -->
+    <section id="hero" class="hero-section">
+      <!-- Background 3D Typography Layer (Layer 2) -->
+      <div class="hero-3d-text" aria-hidden="true">PORTFOLIO</div>
 
-        <div class="motto">
-          <h2>คติประจำใจ</h2>
-          <p id="motto">อยากเก่ง ก็ลงมือทำ</p>
+      <!-- Foreground Transparent Cutout Portrait Layer (Layer 3) -->
+      <div class="hero-portrait-wrap">
+        <img src="image/profile_cutout.png" alt="Pongsatorn Mueangprathete (Kitt)" class="hero-portrait" />
+      </div>
+
+      <!-- Foreground Information Overlay Columns (Layer 4) -->
+      <div class="hero-container">
+        <!-- Left Column: Bio & Main Call-to-Action -->
+        <div class="hero-col hero-left">
+          <span class="handwritten-accent">Hello, I'm</span>
+          <h1 class="hero-title">PONGSATORN</h1>
+          <h2 class="hero-subtitle">WEB & IOT DEVELOPER</h2>
+          <p class="hero-desc">
+            อยากเก่ง ก็ลงมือทำ — พัฒนาระบบ IoT และเว็บแอปพลิเคชัน จากวงจรฮาร์ดแวร์สู่แดชบอร์ดออนไลน์ จัดการข้อมูลเรียลไทม์
+          </p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">ดูผลงานของผม ↓</a>
+            <button id="heroGreetingTrigger" class="btn btn-secondary">ทักทาย ✨</button>
+          </div>
+          <div class="hero-tag location-tag">
+            <span class="pulse-dot"></span> INDRAMAYU / THAILAND · ปวช.2 IT 1
+          </div>
         </div>
 
-        <button id="greetingBtn">ทักทาย</button>
-        <p id="greetingmassege">ยินดีต้อนรับสู่พอร์ตโฟลิโอของผมครับ</p>
+        <!-- Right Column: Quote & Interactive Stats -->
+        <div class="hero-col hero-right">
+          <p class="quote-text">Every code, a new solution<br /><span class="quote-sub">From hardware logic to digital experience.</span></p>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-num">5+</span>
+              <span class="stat-label">ภาษา & เฟรมเวิร์ก</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num">2+</span>
+              <span class="stat-label">โปรเจกต์ IoT & Web</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num">IT 1</span>
+              <span class="stat-label">รหัส 68219010015</span>
+            </div>
+          </div>
+
+          <div class="hero-downloads">
+            <a href="#about" class="btn-download">DOWNLOAD CV ⤓</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating Viral Swarm Dock (TikTok Replication Widget) -->
+    <aside id="swarm-dock" class="swarm-dock">
+      <div class="dock-indicator">
+        <span class="dock-status-dot"></span>
+        <span class="dock-agent-count">18 agents active</span>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-layers">
+        <span id="swarm-layer-count">38 / 364 layers</span>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-controls">
+        <button id="swarmTourBtn" class="dock-btn active" title="Touring mode">Touring</button>
+        <button id="swarmSpeedBtn" class="dock-btn" title="Cycle speed">1x</button>
+        <button id="swarmSoundBtn" class="dock-btn" title="Toggle click audio">🔊</button>
+        <button id="swarmToggleBtn" class="dock-btn btn-pause" title="Pause simulation">Esc to Pause</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Flow -->
+    <main class="content-wrapper">
+      <!-- Section: About Me & Greeting -->
+      <section id="about" class="section-card">
+        <div class="section-header">
+          <span class="section-eyebrow">ABOUT ME</span>
+          <h2 class="section-title">ข้อมูลส่วนตัว & คติประจำใจ</h2>
+        </div>
+
+        <div class="about-grid">
+          <div class="profile-details-card">
+            <div class="detail-row">
+              <span class="detail-label">ชื่อ-นามสกุล</span>
+              <span class="detail-value" id="fullname">พงศกร เมืองประเทศ</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">ชื่อเล่น</span>
+              <span class="detail-value" id="nickname">กิต</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">รหัสประจำตัว</span>
+              <span class="detail-value id-badge" id="studentID">68219010015</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">แผนก / ชั้นปี</span>
+              <span class="detail-value">เทคโนโลยีสารสนเทศ IT 1 (ปวช.2)</span>
+            </div>
+          </div>
+
+          <div class="motto-greeting-card">
+            <div class="motto-box">
+              <h3 class="motto-title">คติประจำใจ</h3>
+              <p class="motto-text" id="motto">"อยากเก่ง ก็ลงมือทำ"</p>
+            </div>
+
+            <div class="greeting-interaction">
+              <button id="greetingBtn" class="btn btn-greeting">ทักทาย ✨</button>
+              <p id="greetingmassege" class="greeting-message">ยินดีต้อนรับสู่พอร์ตโฟลิโอของผมครับ</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <hr class="divider" />
-
-      <!-- ส่วนทักษะความสามารถ (Skills) -->
-      <section id="skills">
-        <h2>Skills ทักษะที่มี</h2>
-        <ul class="skills-list">
-          <li>IoT, Smart Home System, Web Application</li>
-          <li>HTML, CSS, JavaScript, C++, PHP</li>
-          <li>Linux, Windows</li>
-        </ul>
-      </section>
-
-      <hr class="divider" />
-
-      <!-- ส่วนผลงาน (Projects) -->
-      <section id="projects">
-        <h2>Projects ผลงาน</h2>
-        
-        <div class="project-item">
-          <h3>1. ระบบ Smart Farm ด้วย ESP32</h3>
-          <p>พัฒนาโดยมีหน้าเว็บควบคุมและสามารถอ่านค่าเซนเซอร์บนหน้าเว็บที่ไหนก็ได้ พร้อมระบบควบคุมมอเตอร์รดน้ำอัตโนมัติ</p>
+      <!-- Section: Skills Matrix -->
+      <section id="skills" class="section-card">
+        <div class="section-header">
+          <span class="section-eyebrow">CAPABILITIES</span>
+          <h2 class="section-title">Skills & ความเชี่ยวชาญ</h2>
         </div>
 
-        <div class="project-item">
-          <h3>2. เว็บไซต์เรียนรู้ IT Academy</h3>
-          <p>เป็นเว็บไซต์สำหรับเรียนรู้เกี่ยวกับสายงาน IT ทั้ง IoT, Network, Web App และภาษาโปรแกรมมิ่งต่างๆ</p>
+        <div class="skills-grid">
+          <!-- Skill Category 1 -->
+          <div class="skill-category-card">
+            <div class="category-icon">⚡</div>
+            <h3 class="category-title">IoT & Embedded Systems</h3>
+            <p class="category-desc">การพัฒนาฮาร์ดแวร์อัจฉริยะและการเชื่อมต่อระบบคลาวด์</p>
+            <ul class="skills-badge-list">
+              <li>ESP32 Microcontroller</li>
+              <li>Smart Home System</li>
+              <li>Sensor Interfacing</li>
+              <li>Arduino & C++</li>
+            </ul>
+          </div>
+
+          <!-- Skill Category 2 -->
+          <div class="skill-category-card">
+            <div class="category-icon">💻</div>
+            <h3 class="category-title">Web Development</h3>
+            <p class="category-desc">สร้างเว็บแอปพลิเคชันแบบอินเทอร์แอกทีฟและเชื่อมต่อ API</p>
+            <ul class="skills-badge-list">
+              <li>HTML5 & Modern CSS3</li>
+              <li>JavaScript (ES6+)</li>
+              <li>PHP Backend</li>
+              <li>Responsive 2.5D UI</li>
+            </ul>
+          </div>
+
+          <!-- Skill Category 3 -->
+          <div class="skill-category-card">
+            <div class="category-icon">🛠️</div>
+            <h3 class="category-title">Systems & Platforms</h3>
+            <p class="category-desc">ระบบปฏิบัติการ เครื่องมือควบคุมเวอร์ชัน และสภาพแวดล้อมทำงาน</p>
+            <ul class="skills-badge-list">
+              <li>Linux Environment</li>
+              <li>Windows Workstation</li>
+              <li>Git & GitHub</li>
+              <li>VS Code Live Server</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Projects Showcase -->
+      <section id="projects" class="section-card">
+        <div class="section-header">
+          <span class="section-eyebrow">PORTFOLIO WORK</span>
+          <h2 class="section-title">Projects ผลงานที่พัฒนา</h2>
+        </div>
+
+        <div class="projects-grid">
+          <!-- Project 1 -->
+          <article class="project-card">
+            <div class="project-tag">HARDWARE & IOT</div>
+            <h3 class="project-title">1. ระบบ Smart Farm ด้วย ESP32</h3>
+            <p class="project-description">
+              พัฒนาโดยมีหน้าเว็บควบคุมและสามารถอ่านค่าเซนเซอร์บนหน้าเว็บที่ไหนก็ได้ พร้อมระบบควบคุมมอเตอร์รดน้ำอัตโนมัติ ติดตามสภาพแวดล้อม แปลงข้อมูลเป็นกราฟแบบเรียลไทม์
+            </p>
+            <div class="project-tech-tags">
+              <span>ESP32</span>
+              <span>C++</span>
+              <span>Web Dashboard</span>
+              <span>Automation</span>
+            </div>
+          </article>
+
+          <!-- Project 2 -->
+          <article class="project-card">
+            <div class="project-tag">WEB PLATFORM</div>
+            <h3 class="project-title">2. เว็บไซต์เรียนรู้ IT Academy</h3>
+            <p class="project-description">
+              เป็นเว็บไซต์สำหรับเรียนรู้เกี่ยวกับสายงาน IT ทั้ง IoT, Network, Web App และภาษาโปรแกรมมิ่งต่างๆ รวมคู่มือ แหล่งเรียนรู้ และแนวทางการเริ่มต้นสู่สายงานเทคโนโลยี
+            </p>
+            <div class="project-tech-tags">
+              <span>Web Application</span>
+              <span>HTML/CSS/JS</span>
+              <span>PHP</span>
+              <span>Education</span>
+            </div>
+          </article>
         </div>
       </section>
     </main>
 
-    <!-- ส่วนท้ายเว็บไซต์ (Footer) -->
+    <!-- Footer -->
     <footer class="site-footer">
-      <p>&copy; 2026 นายพงศกร เมืองประเทศ (68219010015) - เทคโนโลยีสารสนเทศ IT 1</p>
+      <div class="footer-content">
+        <p class="footer-title">PONGSATORN MUEANGPRATHETE</p>
+        <p class="footer-desc">&copy; 2026 นายพงศกร เมืองประเทศ (68219010015) - แผนกเทคโนโลยีสารสนเทศ IT 1</p>
+        <p class="footer-sub">Designed with 3D Depth & Swarm Agents Choreography</p>
+      </div>
     </footer>
   </body>
 </html>
