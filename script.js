@@ -2,11 +2,11 @@
    PONGSATORN • 3D Cinematic Portfolio Interactive Scripts
    Features:
    - Part 1: Three.js 3D Ambient Particles & Mouse Depth Parallax
-   - Part 2: Viral AI Swarm Agents Simulation Engine
+   - Part 2: Viral AI Swarm Agents Simulation Engine (TikTok Replication)
    - Part 3: Web Audio Synthesizer, Sparkles, and Greeting Typewriter
    ========================================================================== */
 
-// Global State
+// Global 3D State
 let threeScene, threeCamera, threeRenderer, particleSystem;
 let targetMouseX = 0, targetMouseY = 0;
 let currentMouseX = 0, currentMouseY = 0;
@@ -42,7 +42,7 @@ function initThreeBackground() {
   threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   threeCamera.position.z = 50;
 
-  // Particle System (650+ Floating Star-Dust & Crimson Particles)
+  // Particle System (700 Floating Star-Dust & Crimson Particles)
   const particleCount = 700;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
@@ -55,23 +55,16 @@ function initThreeBackground() {
   const softBlueColor = new THREE.Color(0x38bdf8);
 
   for (let i = 0; i < particleCount; i++) {
-    // Spatial positioning in a cylindrical depth volume
     positions[i * 3] = (Math.random() - 0.5) * 120;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
     positions[i * 3 + 2] = (Math.random() - 0.5) * 70;
 
-    // Color gradient distribution: 60% crimson/reds, 30% white, 10% soft blue
     const roll = Math.random();
     let chosenColor;
-    if (roll < 0.45) {
-      chosenColor = crimsonColor;
-    } else if (roll < 0.65) {
-      chosenColor = brightRedColor;
-    } else if (roll < 0.90) {
-      chosenColor = starWhiteColor;
-    } else {
-      chosenColor = softBlueColor;
-    }
+    if (roll < 0.45) chosenColor = crimsonColor;
+    else if (roll < 0.65) chosenColor = brightRedColor;
+    else if (roll < 0.90) chosenColor = starWhiteColor;
+    else chosenColor = softBlueColor;
 
     colors[i * 3] = chosenColor.r;
     colors[i * 3 + 1] = chosenColor.g;
@@ -129,13 +122,11 @@ function initThreeBackground() {
 
     const elapsedTime = clock.getElapsedTime();
 
-    // Subtle drift rotation
     if (particleSystem) {
       particleSystem.rotation.y = elapsedTime * 0.04;
       particleSystem.rotation.x = Math.sin(elapsedTime * 0.03) * 0.05;
     }
 
-    // Smooth Mouse Interpolation (Lerp)
     currentMouseX += (targetMouseX - currentMouseX) * 0.05;
     currentMouseY += (targetMouseY - currentMouseY) * 0.05;
 
@@ -167,11 +158,9 @@ function initParallax() {
   const portraitWrap = document.querySelector('.hero-portrait-wrap');
 
   window.addEventListener('mousemove', (e) => {
-    // Normalize coordinates (-1 to 1)
     targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
     targetMouseY = (e.clientY / window.innerHeight) * 2 - 1;
 
-    // Apply 2.5D Depth shift to DOM elements
     if (bgText) {
       const moveX = targetMouseX * -22;
       const moveY = targetMouseY * -14;
@@ -188,7 +177,6 @@ function initParallax() {
     }
   }, { passive: true });
 
-  // Optional Gyroscope Parallax for Mobile
   if (window.DeviceOrientationEvent && window.innerWidth <= 768) {
     window.addEventListener('deviceorientation', (e) => {
       if (e.gamma !== null && e.beta !== null) {
@@ -199,8 +187,234 @@ function initParallax() {
   }
 }
 
+/* ==========================================================================
+   Part 2: Viral AI Swarm Agents Simulation Engine (TikTok Replication)
+   ========================================================================== */
+let swarmActive = true;
+let swarmSpeed = 1; // 1x, 2x, 3x
+let isTouring = false;
+let currentLayerCount = 38;
+const totalLayers = 364;
+
+// 18 Distinct Agent Personas
+const agentProfiles = [
+  { name: 'Dev-Kitt (Lead)', color: '#e11d48' },
+  { name: 'Agent-UI', color: '#38bdf8' },
+  { name: 'Agent-VFX', color: '#a855f7' },
+  { name: 'System-Bot', color: '#4ade80' },
+  { name: 'Agent-Layout', color: '#f59e0b' },
+  { name: 'Agent-Motion', color: '#ec4899' },
+  { name: 'Agent-3D', color: '#06b6d4' },
+  { name: 'Agent-Typography', color: '#8b5cf6' },
+  { name: 'Agent-Color', color: '#ef4444' },
+  { name: 'Agent-Sensors', color: '#10b981' },
+  { name: 'Agent-Firmware', color: '#6366f1' },
+  { name: 'Agent-Network', color: '#14b8a6' },
+  { name: 'Agent-Database', color: '#eab308' },
+  { name: 'Agent-Security', color: '#f97316' },
+  { name: 'Agent-Audio', color: '#d946ef' },
+  { name: 'Agent-Testing', color: '#84cc16' },
+  { name: 'Agent-Optimizer', color: '#0ea5e9' },
+  { name: 'Agent-Deploy', color: '#f43f5e' }
+];
+
+let activeAgentInstances = [];
+
+function createAgentCursor(agent, index) {
+  const cursorWrap = document.createElement('div');
+  cursorWrap.className = 'swarm-agent-cursor';
+  cursorWrap.id = `agent-cursor-${index}`;
+
+  // SVG Pointer with customized theme color
+  cursorWrap.innerHTML = `
+    <svg class="swarm-cursor-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z" 
+            fill="${agent.color}" stroke="#ffffff" stroke-width="1.2"/>
+    </svg>
+    <div class="swarm-agent-badge" style="background-color: ${agent.color};">
+      ${agent.name}
+    </div>
+  `;
+
+  return cursorWrap;
+}
+
+function initSwarmSimulation() {
+  const container = document.getElementById('swarm-cursor-layer');
+  const dock = document.getElementById('swarm-dock');
+  const toggleBtn = document.getElementById('swarmToggleBtn');
+  const tourBtn = document.getElementById('swarmTourBtn');
+  const speedBtn = document.getElementById('swarmSpeedBtn');
+  const layerCountEl = document.getElementById('swarm-layer-count');
+
+  if (!container) return;
+
+  // Clear existing
+  container.innerHTML = '';
+  activeAgentInstances = [];
+
+  // Spawn agent cursors across screen
+  agentProfiles.forEach((agent, i) => {
+    const el = createAgentCursor(agent, i);
+    container.appendChild(el);
+
+    const startX = Math.random() * (window.innerWidth - 100) + 50;
+    const startY = Math.random() * (window.innerHeight - 100) + 50;
+    el.style.transform = `translate(${startX}px, ${startY}px)`;
+
+    activeAgentInstances.push({
+      el: el,
+      agent: agent,
+      x: startX,
+      y: startY,
+      targetX: startX,
+      targetY: startY,
+      speed: (Math.random() * 0.04 + 0.03),
+      actionCooldown: Math.floor(Math.random() * 60)
+    });
+  });
+
+  // Choreography loop
+  function stepSwarm() {
+    if (!swarmActive) return;
+
+    // Increment layers counter gradually
+    if (Math.random() < 0.08 && currentLayerCount < totalLayers) {
+      currentLayerCount += Math.floor(Math.random() * 2) + 1;
+      if (layerCountEl) {
+        layerCountEl.textContent = `${currentLayerCount} / ${totalLayers} layers`;
+      }
+    }
+
+    const interactiveTargets = document.querySelectorAll(
+      '.hero-title, .hero-subtitle, .stat-card, .btn-primary, .skill-category-card, .project-card, .brand-logo, .nav-link'
+    );
+
+    activeAgentInstances.forEach((inst) => {
+      inst.actionCooldown--;
+
+      if (inst.actionCooldown <= 0) {
+        // Pick a new target element or random nearby position
+        if (interactiveTargets.length > 0 && Math.random() < 0.65) {
+          const target = interactiveTargets[Math.floor(Math.random() * interactiveTargets.length)];
+          const rect = target.getBoundingClientRect();
+          inst.targetX = rect.left + Math.random() * rect.width;
+          inst.targetY = rect.top + Math.random() * rect.height;
+
+          // Occasionally draw a selection box
+          if (Math.random() < 0.25) {
+            triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
+          }
+        } else {
+          inst.targetX = Math.random() * (window.innerWidth - 140) + 70;
+          inst.targetY = Math.random() * (window.innerHeight - 140) + 70;
+        }
+
+        inst.actionCooldown = Math.floor(Math.random() * 80 + 40) / swarmSpeed;
+      }
+
+      // Smooth step towards target
+      inst.x += (inst.targetX - inst.x) * (inst.speed * swarmSpeed);
+      inst.y += (inst.targetY - inst.y) * (inst.speed * swarmSpeed);
+
+      inst.el.style.transform = `translate(${inst.x}px, ${inst.y}px)`;
+    });
+
+    requestAnimationFrame(stepSwarm);
+  }
+
+  requestAnimationFrame(stepSwarm);
+
+  // Trigger floating dashed selection box
+  function triggerSelectionBox(x, y, w, h) {
+    if (!swarmActive) return;
+    const box = document.createElement('div');
+    box.className = 'swarm-box-indicator';
+    box.style.left = `${x}px`;
+    box.style.top = `${y}px`;
+    box.style.width = `${w}px`;
+    box.style.height = `${h}px`;
+    container.appendChild(box);
+
+    setTimeout(() => {
+      box.remove();
+    }, 1400 / swarmSpeed);
+  }
+
+  // Toggle button listener
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', toggleSwarm);
+  }
+
+  // Speed button listener
+  if (speedBtn) {
+    speedBtn.addEventListener('click', () => {
+      if (swarmSpeed === 1) swarmSpeed = 2;
+      else if (swarmSpeed === 2) swarmSpeed = 3;
+      else swarmSpeed = 1;
+      speedBtn.textContent = `${swarmSpeed}x`;
+    });
+  }
+
+  // Tour mode listener
+  if (tourBtn) {
+    tourBtn.addEventListener('click', () => {
+      isTouring = !isTouring;
+      tourBtn.classList.toggle('active', isTouring);
+      if (isTouring) startTourScroll();
+    });
+  }
+
+  // Keyboard shortcut Esc or Alt+Shift+S
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      toggleSwarm();
+    } else if (e.altKey && e.shiftKey && (e.key === 'S' || e.key === 's')) {
+      toggleSwarm();
+    }
+  });
+}
+
+function toggleSwarm() {
+  swarmActive = !swarmActive;
+  const toggleBtn = document.getElementById('swarmToggleBtn');
+  const cursorLayer = document.getElementById('swarm-cursor-layer');
+
+  if (toggleBtn) {
+    toggleBtn.textContent = swarmActive ? 'Esc to Pause' : 'Play Agents ▶';
+    toggleBtn.classList.toggle('btn-pause', swarmActive);
+  }
+
+  if (cursorLayer) {
+    cursorLayer.style.display = swarmActive ? 'block' : 'none';
+  }
+
+  if (swarmActive) {
+    initSwarmSimulation();
+  }
+}
+
+function startTourScroll() {
+  if (!isTouring) return;
+  const sections = ['#hero', '#about', '#skills', '#projects', '#hero'];
+  let currentIdx = 0;
+
+  const tourInterval = setInterval(() => {
+    if (!isTouring) {
+      clearInterval(tourInterval);
+      return;
+    }
+    currentIdx = (currentIdx + 1) % sections.length;
+    const target = document.querySelector(sections[currentIdx]);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 4500);
+}
+
 // Initial boot
 document.addEventListener('DOMContentLoaded', () => {
   initThreeBackground();
   initParallax();
+  initSwarmSimulation();
 });
