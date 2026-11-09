@@ -286,69 +286,195 @@ function triggerSelectionBox(x, y, w, h) {
   }, 1400 / swarmSpeed);
 }
 
+// Role Actions for Contextual Working Inspection Badges
+const agentRoleActions = {
+  'Dev-Kitt (Lead)': 'Lead Review',
+  'Agent-UI': 'Styling CSS',
+  'Agent-VFX': 'Particles FX',
+  'System-Bot': 'Syncing State',
+  'Agent-Layout': 'Aligning Grid',
+  'Agent-Motion': 'Easing Curve',
+  'Agent-3D': 'WebGL Shading',
+  'Agent-Typography': 'Font Kerning',
+  'Agent-Color': 'Palette Glow',
+  'Agent-Sensors': 'IoT Telemetry',
+  'Agent-Firmware': 'ESP32 Logic',
+  'Agent-Network': 'API Latency',
+  'Agent-Database': 'Schema Index',
+  'Agent-Security': 'Auth Shield',
+  'Agent-Audio': 'Chime Synth',
+  'Agent-Testing': 'DOM Verified',
+  'Agent-Optimizer': '60 FPS Lock',
+  'Agent-Deploy': 'Vercel Hook'
+};
+
+function assignAgentNextTarget(inst) {
+  // Find visible interactive elements
+  const allTargets = Array.from(document.querySelectorAll(
+    '.hero-title, .hero-subtitle, .stat-card, .btn, .skill-category-card, .project-card, .brand-logo, .nav-link, .profile-details-card, .motto-box, .btn-project-visit, .location-tag'
+  )).filter(el => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && r.top < window.innerHeight + 120 && r.bottom > -80;
+  });
+
+  // Check occupied targets by other agents to prevent clumping
+  const occupied = new Set(activeAgentInstances.map(a => a !== inst && a.targetEl).filter(Boolean));
+  const available = allTargets.filter(t => !occupied.has(t));
+  const target = available.length > 0
+    ? available[Math.floor(Math.random() * available.length)]
+    : (allTargets.length > 0 ? allTargets[Math.floor(Math.random() * allTargets.length)] : null);
+
+  if (target) {
+    const r = target.getBoundingClientRect();
+    inst.targetEl = target;
+    // Aim smoothly inside the target's bounding box
+    inst.targetX = r.left + Math.random() * (r.width * 0.7) + (r.width * 0.15);
+    inst.targetY = r.top + Math.random() * (r.height * 0.5) + (r.height * 0.25);
+  } else {
+    // If no targets visible, cruise smoothly across viewport
+    inst.targetEl = null;
+    inst.targetX = Math.random() * (window.innerWidth - 160) + 80;
+    inst.targetY = Math.random() * (window.innerHeight - 160) + 80;
+  }
+
+  inst.state = 'TRAVELING';
+  inst.workTimer = 0;
+  inst.workPhase = Math.random() * 10;
+}
+
 function initSwarmSimulation() {
   const container = document.getElementById('swarm-cursor-layer');
-  const toggleBtn = document.getElementById('swarmToggleBtn');
-  const tourBtn = document.getElementById('swarmTourBtn');
-  const speedBtn = document.getElementById('swarmSpeedBtn');
+  const agentCountEl = document.querySelector('.dock-agent-count');
 
   if (!container) return;
 
   container.innerHTML = '';
   activeAgentInstances = [];
 
-  agentProfiles.forEach((agent, i) => {
+  // Responsive agent count: keep screen uncluttered and organized
+  let maxAgents = 18;
+  if (window.innerWidth < 480) {
+    maxAgents = 6;
+  } else if (window.innerWidth <= 1024) {
+    maxAgents = 10;
+  }
+
+  const profilesToUse = agentProfiles.slice(0, maxAgents);
+  if (agentCountEl && !document.querySelector('.dock-status-dot.completed')) {
+    agentCountEl.textContent = `${profilesToUse.length} agents active`;
+  }
+
+  profilesToUse.forEach((agent, i) => {
     const el = createAgentCursor(agent, i);
     container.appendChild(el);
 
-    const startX = Math.random() * (window.innerWidth - 100) + 50;
-    const startY = Math.random() * (window.innerHeight - 100) + 50;
-    el.style.transform = `translate(${startX}px, ${startY}px)`;
+    const startX = Math.random() * (window.innerWidth - 120) + 60;
+    const startY = Math.random() * (window.innerHeight - 120) + 60;
+    el.style.transform = `translate(${startX.toFixed(1)}px, ${startY.toFixed(1)}px)`;
 
-    activeAgentInstances.push({
+    const inst = {
       el: el,
       agent: agent,
       x: startX,
       y: startY,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
       targetX: startX,
       targetY: startY,
-      speed: (Math.random() * 0.04 + 0.03),
-      actionCooldown: Math.floor(Math.random() * 60)
-    });
+      targetEl: null,
+      state: 'TRAVELING',
+      workTimer: 0,
+      workPhase: Math.random() * 10,
+      speedMultiplier: 0.9 + Math.random() * 0.25,
+      roleAction: agentRoleActions[agent.name] || 'Active'
+    };
+
+    assignAgentNextTarget(inst);
+    activeAgentInstances.push(inst);
   });
 
   function stepSwarm() {
     if (!swarmActive) return;
 
-    const interactiveTargets = document.querySelectorAll(
-      '.hero-title, .hero-subtitle, .stat-card, .btn-primary, .skill-category-card, .project-card, .brand-logo, .nav-link'
-    );
-
     activeAgentInstances.forEach((inst) => {
-      inst.actionCooldown--;
+      // 1. STATE MACHINE: TRAVELING vs WORKING
+      if (inst.state === 'TRAVELING') {
+        const dx = inst.targetX - inst.x;
+        const dy = inst.targetY - inst.y;
+        const dist = Math.hypot(dx, dy);
 
-      if (inst.actionCooldown <= 0) {
-        if (interactiveTargets.length > 0 && Math.random() < 0.65) {
-          const target = interactiveTargets[Math.floor(Math.random() * interactiveTargets.length)];
-          const rect = target.getBoundingClientRect();
-          inst.targetX = rect.left + Math.random() * rect.width;
-          inst.targetY = rect.top + Math.random() * rect.height;
+        // Smooth cruise speed with graceful deceleration on arrival
+        const cruiseSpeed = 4.2 * inst.speedMultiplier * swarmSpeed;
+        const desiredSpeed = dist < 75 ? (dist / 75) * cruiseSpeed : cruiseSpeed;
 
-          if (Math.random() < 0.20) {
-            triggerSelectionBox(rect.left, rect.top, rect.width, rect.height);
+        const desiredVx = (dx / (dist || 1)) * desiredSpeed;
+        const desiredVy = (dy / (dist || 1)) * desiredSpeed;
+
+        // Smooth steering interpolation (buttery inertia curve)
+        inst.vx += (desiredVx - inst.vx) * 0.085;
+        inst.vy += (desiredVy - inst.vy) * 0.085;
+
+        // Check if arrived at target element
+        if (dist < 18) {
+          inst.state = 'WORKING';
+          inst.workTimer = Math.floor(Math.random() * 80 + 90) / swarmSpeed; // 1.5 - 3s focused work
+          inst.workPhase = 0;
+
+          // Update badge to focused work role
+          const badge = inst.el.querySelector('.swarm-agent-badge');
+          if (badge) {
+            badge.textContent = `${inst.agent.name} (${inst.roleAction})`;
           }
-        } else {
-          inst.targetX = Math.random() * (window.innerWidth - 140) + 70;
-          inst.targetY = Math.random() * (window.innerHeight - 140) + 70;
-        }
 
-        inst.actionCooldown = Math.floor(Math.random() * 80 + 40) / swarmSpeed;
+          // Subtle selective inspection box (at most 25% chance)
+          if (inst.targetEl && Math.random() < 0.25) {
+            const r = inst.targetEl.getBoundingClientRect();
+            triggerSelectionBox(r.left, r.top, r.width, r.height);
+          }
+        }
+      } else if (inst.state === 'WORKING') {
+        // Organic micro-motion while inspecting element
+        inst.workPhase += 0.04;
+        const microX = inst.targetX + Math.sin(inst.workPhase) * 8;
+        const microY = inst.targetY + Math.cos(inst.workPhase * 0.75) * 5;
+
+        inst.vx += (microX - inst.x) * 0.06;
+        inst.vy += (microY - inst.y) * 0.06;
+        inst.vx *= 0.82;
+        inst.vy *= 0.82;
+
+        inst.workTimer--;
+        if (inst.workTimer <= 0) {
+          // Restore clean original badge
+          const badge = inst.el.querySelector('.swarm-agent-badge');
+          if (badge) {
+            badge.textContent = inst.agent.name;
+          }
+          assignAgentNextTarget(inst);
+        }
       }
 
-      inst.x += (inst.targetX - inst.x) * (inst.speed * swarmSpeed);
-      inst.y += (inst.targetY - inst.y) * (inst.speed * swarmSpeed);
+      // 2. FLOCKING SEPARATION (Anti-Clumping / Anti-Collision)
+      activeAgentInstances.forEach((other) => {
+        if (other === inst) return;
+        const sepDx = inst.x - other.x;
+        const sepDy = inst.y - other.y;
+        const sepDist = Math.hypot(sepDx, sepDy);
+        const minSpace = 68; // Space to keep badges readable
+        if (sepDist > 0 && sepDist < minSpace) {
+          const repel = ((minSpace - sepDist) / minSpace) * 0.32;
+          inst.vx += (sepDx / sepDist) * repel;
+          inst.vy += (sepDy / sepDist) * repel;
+        }
+      });
 
-      inst.el.style.transform = `translate(${inst.x}px, ${inst.y}px)`;
+      // 3. APPLY POSITION & NATURAL TILT ANGLE
+      inst.x += inst.vx;
+      inst.y += inst.vy;
+
+      // Banking angle: tilt gently into the direction of flight (-10deg to +10deg)
+      const tilt = Math.max(-10, Math.min(10, inst.vx * 1.6));
+      inst.el.style.transform = `translate(${inst.x.toFixed(1)}px, ${inst.y.toFixed(1)}px) rotate(${tilt.toFixed(1)}deg)`;
     });
 
     requestAnimationFrame(stepSwarm);
