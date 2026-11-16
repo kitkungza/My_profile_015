@@ -33,12 +33,22 @@
         <a href="#about" class="nav-link">About</a>
         <a href="#skills" class="nav-link">Skills</a>
         <a href="#projects" class="nav-link">Projects</a>
+        <a href="#cost-estimator" class="nav-link">Estimator</a>
       </nav>
       <div class="header-actions">
         <button id="audioToggleBtn" class="icon-btn" title="Toggle Ambient Audio" aria-label="Toggle Audio">🔊</button>
         <a href="#about" class="btn-nav-cta">Let's Talk ↗</a>
       </div>
     </header>
+
+    <!-- Welcome Notification Banner (Personalized Welcome) -->
+    <div id="welcome-banner" class="welcome-banner">
+      <div class="welcome-container">
+        <span class="welcome-icon">👋</span>
+        <span id="welcomeMessage" class="welcome-text">ยินดีต้อนรับเข้าสู่เว็บไซต์ Portfolio</span>
+        <button id="changeNameBtn" class="btn-change-name" title="เปลี่ยนชื่อผู้เข้าชม">เปลี่ยนชื่อ ✎</button>
+      </div>
+    </div>
 
     <!-- Hero Section: 2.5D Depth Effect & Cutout Overlapping 3D "PORTFOLIO" -->
     <section id="hero" class="hero-section">
@@ -261,6 +271,51 @@
               </a>
             </div>
           </article>
+        </div>
+      </section>
+      <!-- Section: Website Cost Estimator (ระบบประมาณการค่าบริการพัฒนาเว็บไซต์) -->
+      <section id="cost-estimator" class="section-card cost-estimator-section">
+        <div class="section-header">
+          <span class="section-eyebrow">SERVICES & ESTIMATION</span>
+          <h2 class="section-title">ประมาณการค่าบริการพัฒนาเว็บไซต์</h2>
+        </div>
+
+        <div class="estimator-container">
+          <div class="estimator-info-card">
+            <div class="rate-badge">
+              <span class="rate-label">อัตราค่าบริการพัฒนาเว็บไซต์</span>
+              <span class="rate-amount">500 <span class="rate-unit">บาท / หน้า</span></span>
+            </div>
+            <p class="estimator-desc">
+              ระบบช่วยคำนวณงบประมาณเบื้องต้นสำหรับผู้ที่สนใจพัฒนาเว็บแอปพลิเคชัน โดยกำหนดราคาค่าบริการมาตรฐานที่หน้าละ 500 บาท ครอบคลุมการออกแบบโครงสร้าง Responsive และความสวยงามทันสมัย
+            </p>
+            <div class="estimator-action-box">
+              <button id="calcCostBtn" class="btn btn-primary btn-calc">
+                <span>คำนวณราคาประเมิน</span>
+                <span class="btn-icon">⚡</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="estimator-result-card">
+            <h3 class="result-title">สรุปผลการประเมินราคา</h3>
+            <div class="result-rows">
+              <div class="result-row">
+                <span class="result-label">อัตราค่าบริการต่อหน้า:</span>
+                <span class="result-value">500 บาท</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">จำนวนหน้าที่ต้องการ:</span>
+                <span class="result-value highlight-num" id="estPageCount">-</span>
+              </div>
+              <div class="result-divider"></div>
+              <div class="result-row total-row">
+                <span class="result-label">ค่าบริการรวมทั้งหมด:</span>
+                <span class="result-value total-price" id="estTotalPrice">-</span>
+              </div>
+            </div>
+            <p id="estRemark" class="result-remark">* กดปุ่ม "คำนวณราคาประเมิน" เพื่อระบุจำนวนหน้าที่ต้องการ</p>
+          </div>
         </div>
       </section>
     </main>

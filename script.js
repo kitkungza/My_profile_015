@@ -1021,8 +1021,131 @@ document.addEventListener('DOMContentLoaded', () => {
   initSwarmSimulation();
   setupProgressiveBuild();
   initInteractions();
+  initPersonalizedWelcome();
+  initCostEstimator();
 });
 
 window.addEventListener('load', () => {
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 });
+
+/* ==========================================================================
+   Part 5: Course Assignments (ระบบต้อนรับ และระบบคำนวณค่าบริการพัฒนาเว็บไซต์)
+   ========================================================================== */
+
+/**
+ * ส่วนที่ 1: ระบบข้อความต้อนรับผู้เข้าชม (Personalized Welcome)
+ * - ใช้ prompt() เพื่อรับชื่อผู้เข้าชมเว็บไซต์
+ * - ใช้ตัวแปร visitorName จัดเก็บชื่อผู้เข้าชม
+ * - แสดงข้อความต้อนรับบนหน้าเว็บไซต์ เช่น "ยินดีต้อนรับคุณ [ชื่อ] เข้าสู่เว็บไซต์ Portfolio ของฉัน"
+ */
+let visitorName = '';
+
+function promptVisitorName() {
+  let inputName = null;
+  if (typeof prompt === 'function') {
+    inputName = prompt('ยินดีต้อนรับสู่ Portfolio! กรุณากรอกชื่อของคุณ:');
+  }
+
+  // ใช้ตัวแปรจัดเก็บชื่อผู้เข้าชม พร้อมกำหนดค่าเริ่มต้นกรณีไม่ได้กรอก
+  if (inputName && inputName.trim() !== '') {
+    visitorName = inputName.trim();
+  } else {
+    visitorName = 'ผู้เข้าชม';
+  }
+
+  // แสดงข้อความต้อนรับบนหน้าเว็บไซต์
+  const welcomeMsgEl = document.getElementById('welcomeMessage');
+  if (welcomeMsgEl) {
+    welcomeMsgEl.innerHTML = `ยินดีต้อนรับคุณ <strong>${visitorName}</strong> เข้าสู่เว็บไซต์ Portfolio ของฉัน`;
+  }
+}
+
+function initPersonalizedWelcome() {
+  // เรียกใช้งานเพื่อรับชื่อผู้เข้าชม
+  promptVisitorName();
+
+  // ปุ่มสำหรับคลิกเพื่อเปลี่ยนชื่อผู้เข้าชมได้ตลอดเวลา
+  const changeNameBtn = document.getElementById('changeNameBtn');
+  if (changeNameBtn) {
+    changeNameBtn.addEventListener('click', () => {
+      promptVisitorName();
+      if (typeof playChimeSound === 'function') {
+        playChimeSound(587.33, 0.2);
+      }
+    });
+  }
+}
+
+/**
+ * ส่วนที่ 2: ระบบประมาณการค่าบริการพัฒนาเว็บไซต์ (Website Cost Estimator)
+ * - กำหนดราคาค่าพัฒนาเว็บไซต์หน้าละ 500 บาท
+ * - ใช้ prompt() รับจำนวนหน้าที่ต้องการ
+ * - ใช้ Number() แปลงข้อมูลเป็นตัวเลข
+ * - คำนวณค่าบริการทั้งหมด (จำนวนหน้า × 500)
+ * - แสดงจำนวนหน้าและค่าบริการรวมบนหน้าเว็บไซต์
+ */
+function estimateWebsiteCost() {
+  // กำหนดราคาค่าพัฒนาเว็บไซต์หน้าละ 500 บาท
+  const pricePerPage = 500;
+
+  // ใช้ prompt() รับจำนวนหน้าที่ต้องการ
+  let inputPages = null;
+  if (typeof prompt === 'function') {
+    inputPages = prompt('กรุณาระบุจำนวนหน้าที่ต้องการพัฒนาเว็บไซต์ (ราคาหน้าละ 500 บาท):');
+  }
+
+  // กรณีผู้ใช้กด Cancel หรือปิดหน้าต่าง
+  if (inputPages === null) {
+    return;
+  }
+
+  // ใช้ Number() แปลงข้อมูลเป็นตัวเลข
+  const pageCount = Number(inputPages);
+
+  const displayPageEl = document.getElementById('estPageCount');
+  const displayTotalEl = document.getElementById('estTotalPrice');
+  const remarkEl = document.getElementById('estRemark');
+
+  // ตรวจสอบความถูกต้องของข้อมูล (ต้องเป็นตัวเลขที่มากกว่า 0)
+  if (isNaN(pageCount) || pageCount <= 0 || !Number.isInteger(pageCount)) {
+    if (typeof alert === 'function') {
+      alert('กรุณากรอกจำนวนหน้าเป็นตัวเลขจำนวนเต็มบวกที่ถูกต้องครับ (เช่น 1, 2, 5)');
+    }
+    if (displayPageEl) displayPageEl.textContent = '-';
+    if (displayTotalEl) displayTotalEl.textContent = '-';
+    if (remarkEl) {
+      remarkEl.textContent = '* ข้อมูลไม่ถูกต้อง กรุณากดคำนวณใหม่อีกครั้ง';
+      remarkEl.style.color = '#ff4d6d';
+    }
+    return;
+  }
+
+  // คำนวณค่าบริการทั้งหมด (จำนวนหน้า × 500)
+  const totalPrice = pageCount * pricePerPage;
+
+  // แสดงจำนวนหน้าและค่าบริการรวมบนหน้าเว็บไซต์
+  if (displayPageEl) {
+    displayPageEl.textContent = `${pageCount.toLocaleString()} หน้า`;
+  }
+  if (displayTotalEl) {
+    displayTotalEl.textContent = `${totalPrice.toLocaleString()} บาท`;
+  }
+  if (remarkEl) {
+    remarkEl.textContent = `* คำนวณเรียบร้อย: ${pageCount} หน้า × 500 บาท = ${totalPrice.toLocaleString()} บาท`;
+    remarkEl.style.color = '#38bdf8';
+  }
+
+  // เล่นเสียง Synthesizer ยืนยันการคำนวณ (ถ้ามี)
+  if (typeof playChimeSound === 'function') {
+    playChimeSound(880, 0.25);
+  }
+}
+
+function initCostEstimator() {
+  const calcBtn = document.getElementById('calcCostBtn');
+  if (calcBtn) {
+    calcBtn.addEventListener('click', estimateWebsiteCost);
+  }
+}
+
