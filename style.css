@@ -1940,3 +1940,447 @@ body {
   font-style: italic;
 }
 
+
+
+/* ==========================================================================
+   Part 6: Vibe Coding 2.0 Enhancements (Theme, Filter, Modal, Contact)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   03. Dark / Light Mode Theme Switching
+   -------------------------------------------------------------------------- */
+body.light-mode {
+  --bg-dark: #f1f5f9;
+  --bg-surface: rgba(255, 255, 255, 0.88);
+  --bg-surface-hover: rgba(248, 250, 252, 0.96);
+  --border-subtle: rgba(15, 23, 42, 0.1);
+  --border-focus: rgba(225, 29, 72, 0.5);
+  
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-dim: #64748b;
+  --accent-glow: rgba(225, 29, 72, 0.2);
+}
+
+body.light-mode html {
+  background-color: var(--bg-dark);
+}
+
+body.light-mode .site-header {
+  background: rgba(241, 245, 249, 0.85);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+body.light-mode .hero-3d-text {
+  color: rgba(15, 23, 42, 0.05);
+  text-shadow: 0 0 40px rgba(225, 29, 72, 0.15);
+}
+
+body.light-mode .section-card,
+body.light-mode .profile-details-card,
+body.light-mode .motto-greeting-card,
+body.light-mode .skill-category-card,
+body.light-mode .project-card,
+body.light-mode .estimator-info-card,
+body.light-mode .estimator-result-card,
+body.light-mode .contact-form,
+body.light-mode .modal-card {
+  background: var(--bg-surface);
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.07);
+}
+
+body.light-mode .project-tech-tags span,
+body.light-mode .skills-badge-list li {
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--text-main);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+body.light-mode .form-control {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+body.light-mode .form-control:focus {
+  background: #ffffff;
+  border-color: var(--accent-crimson);
+}
+
+body.light-mode .modal-backdrop {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+body.light-mode .modal-card {
+  background: #ffffff;
+  border-color: rgba(225, 29, 72, 0.3);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2), 0 0 30px var(--accent-glow);
+}
+
+body.light-mode .filter-btn {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-muted);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+body.light-mode .filter-btn:hover {
+  background: rgba(225, 29, 72, 0.08);
+  color: var(--accent-crimson);
+}
+
+body.light-mode .filter-btn.active {
+  background: var(--accent-crimson);
+  color: #ffffff;
+  border-color: var(--accent-crimson-bright);
+}
+
+/* --------------------------------------------------------------------------
+   01. Project Filter Bar
+   -------------------------------------------------------------------------- */
+.project-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(8px);
+  user-select: none;
+}
+
+.filter-btn .filter-icon {
+  font-size: 1rem;
+}
+
+.filter-btn:hover {
+  border-color: var(--accent-crimson);
+  color: var(--text-main);
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background: var(--accent-crimson);
+  border-color: var(--accent-crimson-bright);
+  color: #ffffff;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.project-card.is-hidden {
+  display: none !important;
+}
+
+.project-status-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-project-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-project-detail:hover {
+  background: var(--accent-crimson);
+  color: #ffffff;
+  border-color: var(--accent-crimson-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+/* --------------------------------------------------------------------------
+   04. Project Details Modal Popup
+   -------------------------------------------------------------------------- */
+.project-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.project-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 4, 8, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #111218;
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+  transform: scale(0.92);
+  transition: transform var(--transition-normal);
+  z-index: 10;
+}
+
+.project-modal.is-open .modal-card {
+  transform: scale(1);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 4px 8px;
+}
+
+.modal-close-btn:hover {
+  color: var(--accent-crimson);
+}
+
+.modal-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-crimson);
+  background: rgba(225, 29, 72, 0.12);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  margin-bottom: 8px;
+}
+
+.modal-title {
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--text-main);
+}
+
+.modal-description {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.modal-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 18px 0 10px 0;
+}
+
+.modal-highlights-list {
+  margin: 0 0 18px 0;
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.modal-highlights-list li {
+  margin-bottom: 6px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   02. Contact Form & Feedback Validation
+   -------------------------------------------------------------------------- */
+.contact-section {
+  margin-top: 36px;
+}
+
+.contact-container {
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+.contact-form {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.form-label .required {
+  color: var(--accent-crimson);
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap .input-icon {
+  position: absolute;
+  right: 14px;
+  font-size: 1rem;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.input-wrap .textarea-icon {
+  top: 14px;
+  align-self: flex-start;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 42px 12px 16px;
+  background: rgba(18, 18, 24, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--accent-crimson);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: rgba(28, 28, 38, 0.95);
+}
+
+.form-control.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+}
+
+.form-error {
+  font-size: 0.82rem;
+  color: #ef4444;
+  margin-top: 6px;
+  min-height: 18px;
+}
+
+.btn-submit-contact {
+  width: 100%;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.contact-status-box {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.contact-status-box.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+}
+
+.contact-status-box.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #f87171;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .project-filter-bar {
+    justify-content: center;
+  }
+  .contact-form {
+    padding: 24px 18px;
+  }
+  .modal-card {
+    padding: 24px 18px;
+  }
+}

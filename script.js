@@ -1023,6 +1023,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initInteractions();
   initPersonalizedWelcome();
   initCostEstimator();
+  // Vibe Coding 2.0 Features
+  initThemeToggle();
+  initProjectFilter();
+  initProjectModal();
+  initContactForm();
 });
 
 window.addEventListener('load', () => {
@@ -1149,3 +1154,347 @@ function initCostEstimator() {
   }
 }
 
+
+
+/* ==========================================================================
+   Part 6: Vibe Coding 2.0 Features
+   - 01: Project Filter (ระบบกรองผลงานตามหมวดหมู่)
+   - 02: Contact Form with Validation (แบบฟอร์มติดต่อพร้อมตรวจสอบข้อมูล)
+   - 03: Dark Mode / Light Mode Switch (ระบบสลับธีมมืดและสว่าง)
+   - 04: Project Details Modal Popup (หน้าต่างแสดงรายละเอียดผลงานเพิ่มเติม)
+   ========================================================================== */
+
+/**
+ * 03. Dark / Light Mode Switcher
+ * - จัดการสลับธีมระหว่าง Dark Mode (ค่าเริ่มต้น) และ Light Mode
+ * - จดจำค่าที่ผู้ใช้เลือกลงใน localStorage
+ * - อัปเดตไอคอนปุ่ม (🌙 <-> ☀️) และปรับแต่งบรรยากาศสีสัน
+ */
+function initThemeToggle() {
+  const themeBtn = document.getElementById('themeToggleBtn');
+  if (!themeBtn) return;
+
+  // ตรวจสอบค่าธีมที่บันทึกไว้ใน localStorage
+  const savedTheme = localStorage.getItem('portfolio-theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeBtn.textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-mode');
+    themeBtn.textContent = '🌙';
+  }
+
+  themeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeBtn.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark');
+
+    // เล่นเสียง Effect ตอบสนองการกดปุ่ม
+    if (typeof playChimeSound === 'function') {
+      playChimeSound(784, 0.2); // G5 chime note
+    }
+  });
+}
+
+/**
+ * 01. Project Filter System
+ * - กรองผลงานตามหมวดหมู่: ทั้งหมด (all), IoT & Hardware (iot), Web Application (web)
+ * - สลับสถานะ active ของปุ่มตัวกรอง
+ * - ซ่อน/แสดงการ์ดผลงานอย่างลื่นไหล
+ */
+function initProjectFilter() {
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const projectCards = document.querySelectorAll('.project-card');
+  if (!filterBtns.length || !projectCards.length) return;
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // อัปเดตสถานะปุ่มที่ถูกเลือก
+      filterBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+
+      const filterVal = btn.getAttribute('data-filter');
+
+      // ซ่อนหรือแสดงผลงานตามหมวดหมู่
+      projectCards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        if (filterVal === 'all' || category === filterVal) {
+          card.classList.remove('is-hidden');
+        } else {
+          card.classList.add('is-hidden');
+        }
+      });
+
+      if (typeof playChimeSound === 'function') {
+        playChimeSound(659.25, 0.15); // E5 chime
+      }
+    });
+  });
+}
+
+/**
+ * 04. Project Details Modal Popup
+ * - จัดเก็บข้อมูลรายละเอียดเชิงลึกของแต่ละผลงาน
+ * - เปิดหน้าต่างป๊อปอัปแสดงชื่อผลงาน หมวดหมู่ คำอธิบาย จุดเด่น และเทคโนโลยี
+ * - รองรับการปิดหน้าต่างด้วยปุ่มกากบาท ปุ่มปิด คลิกพื้นหลัง หรือกดปุ่ม Escape
+ */
+const projectDetailsData = {
+  smartfarm: {
+    title: '1. ระบบ Smart Farm ด้วย ESP32',
+    tag: 'HARDWARE & IOT',
+    desc: 'ระบบฟาร์มอัจฉริยะที่ใช้ ESP32 ในการควบคุมเซนเซอร์วัดความชื้นในดิน อุณหภูมิ และความเข้มแสง พร้อมหน้าเว็บ Dashboard ควบคุมแบบเรียลไทม์ผ่าน WiFi จัดการสั่งรดน้ำอัตโนมัติ',
+    highlights: [
+      'เชื่อมต่อเซนเซอร์ตรวจวัดสภาพแวดล้อม (DHT22, Soil Moisture Sensor, LDR)',
+      'หน้าเว็บ Web Dashboard สำหรับมอนิเตอร์และสั่งเปิด/ปิดวาล์วน้ำได้ทุกที่ผ่านอินเทอร์เน็ต',
+      'ระบบทำงานอัตโนมัติทันทีเมื่อค่าความชื้นในดินต่ำกว่าเกณฑ์ที่กำหนด',
+      'แปลงข้อมูลสถิติสภาพแวดล้อมย้อนหลังแสดงผลเป็นกราฟแนวโน้มแบบเรียลไทม์'
+    ],
+    tech: ['ESP32', 'C++', 'Web Dashboard', 'Automation', 'Sensors'],
+    link: null
+  },
+  itacademy: {
+    title: '2. เว็บไซต์เรียนรู้ IT Academy',
+    tag: 'WEB PLATFORM',
+    desc: 'แพลตฟอร์มการเรียนรู้ออนไลน์สำหรับผู้สนใจด้านเทคโนโลยีสารสนเทศ รวบรวมหลักสูตร สื่อการสอน และแบบทดสอบเกี่ยวกับ IoT, Network, และ Web Application',
+    highlights: [
+      'ระบบแสดงหลักสูตรและเนื้อหาบทเรียนเป็นหมวดหมู่อย่างเป็นระเบียบ',
+      'ออกแบบ UI ทันสมัย รองรับทั้งคอมพิวเตอร์และโทรศัพท์มือถือ (Responsive Web)',
+      'มีแบบทดสอบและลิงก์แหล่งเรียนรู้เพิ่มเติมในสายงานเทคโนโลยี',
+      'เชื่อมต่อกับ Vercel สำหรับการ Deploy และเปิดใช้งานจริงบนออนไลน์'
+    ],
+    tech: ['Web Application', 'HTML5/CSS3', 'JavaScript', 'PHP', 'Education'],
+    link: 'https://it-academy-online.vercel.app/'
+  },
+  smartdetect: {
+    title: '3. ระบบตรวจจับวัตถุอัจฉริยะ (Smart Detection)',
+    tag: 'HARDWARE & IOT',
+    desc: 'ระบบเฝ้าระวังและตรวจจับความเคลื่อนไหวผ่านเซนเซอร์และ ESP32 ส่งสัญญาณแจ้งเตือนอัตโนมัติแบบเรียลไทม์ เพิ่มความปลอดภัยให้สถานที่',
+    highlights: [
+      'ตรวจจับความเคลื่อนไหวด้วยเซนเซอร์อินฟราเรด (PIR Sensor) แบบแม่นยำ',
+      'แจ้งเตือนสถานะทันทีเมื่อพบความเคลื่อนไหวผิดปกติ',
+      'รองรับการส่งข้อมูลผ่านโพรโทคอล MQTT สำหรับระบบ Smart Security',
+      'ประหยัดพลังงานด้วยระบบ Standby อัจฉริยะ'
+    ],
+    tech: ['ESP32', 'PIR Sensor', 'MQTT Protocol', 'IoT Security'],
+    link: null
+  },
+  bloompetal: {
+    title: '4. Bloom & Petal ร้านดอกไม้ออนไลน์',
+    tag: 'WEB PLATFORM',
+    desc: 'เว็บแอปพลิเคชันระบบสั่งซื้อสินค้าออนไลน์สำหรับร้านดอกไม้ รองรับระบบตะกร้าสินค้า (Cart), ค้นหาสินค้า และออกแบบหน้าเว็บแบบ Responsive',
+    highlights: [
+      'ระบบแคตตาล็อกสินค้าพร้อมตัวกรองประเภทช่อดอกไม้และของขวัญ',
+      'ระบบตะกร้าสินค้าแบบเรียลไทม์ (Cart Management) คำนวณยอดเงินอัตโนมัติ',
+      'หน้าเว็บรองรับ Mobile-First Design แสดงผลสวยงามบนสมาร์ตโฟน',
+      'โครงสร้างโค้ด HTML5 / CSS3 / Vanilla JS ประสิทธิภาพสูง'
+    ],
+    tech: ['HTML5 / CSS3', 'JavaScript', 'Firebase Hosting', 'E-Commerce UI'],
+    link: null
+  }
+};
+
+function initProjectModal() {
+  const modal = document.getElementById('projectModal');
+  if (!modal) return;
+
+  const backdrop = document.getElementById('modalBackdrop');
+  const closeBtn = document.getElementById('modalCloseBtn');
+  const cancelBtn = document.getElementById('modalCancelBtn');
+  const titleEl = document.getElementById('modalTitle');
+  const tagEl = document.getElementById('modalTag');
+  const descEl = document.getElementById('modalDesc');
+  const highlightsEl = document.getElementById('modalHighlights');
+  const techTagsEl = document.getElementById('modalTechTags');
+  const liveLinkEl = document.getElementById('modalLiveLink');
+
+  const openModal = (key) => {
+    const data = projectDetailsData[key];
+    if (!data) return;
+
+    if (titleEl) titleEl.textContent = data.title;
+    if (tagEl) tagEl.textContent = data.tag;
+    if (descEl) descEl.textContent = data.desc;
+
+    if (highlightsEl) {
+      highlightsEl.innerHTML = '';
+      data.highlights.forEach(h => {
+        const li = document.createElement('li');
+        li.textContent = h;
+        highlightsEl.appendChild(li);
+      });
+    }
+
+    if (techTagsEl) {
+      techTagsEl.innerHTML = '';
+      data.tech.forEach(t => {
+        const span = document.createElement('span');
+        span.textContent = t;
+        techTagsEl.appendChild(span);
+      });
+    }
+
+    if (liveLinkEl) {
+      if (data.link) {
+        liveLinkEl.href = data.link;
+        liveLinkEl.style.display = 'inline-flex';
+      } else {
+        liveLinkEl.style.display = 'none';
+      }
+    }
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    if (typeof playChimeSound === 'function') {
+      playChimeSound(700, 0.2);
+    }
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  document.querySelectorAll('.btn-project-detail').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = btn.getAttribute('data-project');
+      openModal(key);
+    });
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+      closeModal();
+    }
+  });
+}
+
+/**
+ * 02. Contact Form with Input Validation
+ * - ตรวจสอบความถูกต้องของข้อมูล (Validation):
+ *   1) ชื่อ: ต้องไม่ว่าง และมีความยาวอย่างน้อย 2 ตัวอักษร
+ *   2) อีเมล: ต้องไม่ว่าง และเป็นรูปแบบอีเมลที่ถูกต้อง (name@example.com)
+ *   3) ข้อความ: ต้องไม่ว่าง และมีความยาวอย่างน้อย 5 ตัวอักษร
+ * - แสดงข้อความแจ้งเตือนข้อผิดพลาดใต้ช่องกรอกแบบเรียลไทม์
+ * - แสดงกล่องข้อความแจ้งเตือนความสำเร็จ (Success Banner) พร้อมจำลองการทำงานโดยไม่ต้องส่งอีเมลจริง
+ */
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  const nameInput = document.getElementById('contactName');
+  const emailInput = document.getElementById('contactEmail');
+  const messageInput = document.getElementById('contactMessage');
+
+  const nameError = document.getElementById('nameError');
+  const emailError = document.getElementById('emailError');
+  const messageError = document.getElementById('messageError');
+  const statusBox = document.getElementById('contactStatus');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Real-time clear error upon input
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      nameInput.classList.remove('is-invalid');
+      if (nameError) nameError.textContent = '';
+    });
+  }
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      emailInput.classList.remove('is-invalid');
+      if (emailError) emailError.textContent = '';
+    });
+  }
+  if (messageInput) {
+    messageInput.addEventListener('input', () => {
+      messageInput.classList.remove('is-invalid');
+      if (messageError) messageError.textContent = '';
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let isValid = true;
+
+    // Reset error messages and status
+    if (nameError) nameError.textContent = '';
+    if (emailError) emailError.textContent = '';
+    if (messageError) messageError.textContent = '';
+    if (statusBox) {
+      statusBox.style.display = 'none';
+      statusBox.className = 'contact-status-box';
+    }
+
+    // 1. ตรวจสอบชื่อ
+    const nameVal = nameInput ? nameInput.value.trim() : '';
+    if (!nameVal) {
+      if (nameError) nameError.textContent = 'กรุณากรอกชื่อของคุณ';
+      if (nameInput) nameInput.classList.add('is-invalid');
+      isValid = false;
+    } else if (nameVal.length < 2) {
+      if (nameError) nameError.textContent = 'ชื่อต้องมีความยาวอย่างน้อย 2 ตัวอักษร';
+      if (nameInput) nameInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // 2. ตรวจสอบอีเมล
+    const emailVal = emailInput ? emailInput.value.trim() : '';
+    if (!emailVal) {
+      if (emailError) emailError.textContent = 'กรุณากรอกอีเมลของคุณ';
+      if (emailInput) emailInput.classList.add('is-invalid');
+      isValid = false;
+    } else if (!emailRegex.test(emailVal)) {
+      if (emailError) emailError.textContent = 'รูปแบบอีเมลไม่ถูกต้อง (เช่น example@mail.com)';
+      if (emailInput) emailInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // 3. ตรวจสอบข้อความ
+    const msgVal = messageInput ? messageInput.value.trim() : '';
+    if (!msgVal) {
+      if (messageError) messageError.textContent = 'กรุณากรอกข้อความที่คุณต้องการติดต่อ';
+      if (messageInput) messageInput.classList.add('is-invalid');
+      isValid = false;
+    } else if (msgVal.length < 5) {
+      if (messageError) messageError.textContent = 'ข้อความต้องมีความยาวอย่างน้อย 5 ตัวอักษร';
+      if (messageInput) messageInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // หากข้อมูลไม่ถูกต้อง หยุดการทำงานและส่งเสียงเตือน
+    if (!isValid) {
+      if (typeof playChimeSound === 'function') {
+        playChimeSound(330, 0.2); // Low frequency alert chime
+      }
+      return;
+    }
+
+    // จำลองการส่งข้อมูลสำเร็จ และแสดงข้อความแจ้งเตือน
+    if (statusBox) {
+      statusBox.className = 'contact-status-box success';
+      statusBox.innerHTML = `<strong>✅ ส่งข้อความสำเร็จ!</strong> ขอบคุณคุณ <strong>${nameVal}</strong> ทางเราได้รับข้อความของคุณเรียบร้อยแล้ว และจะติดต่อกลับไปยัง <em>${emailVal}</em> โดยเร็ว (จำลองการทำงานโดยไม่จำเป็นต้องส่งอีเมลจริง)`;
+      statusBox.style.display = 'block';
+    }
+
+    // ล้างข้อมูลในฟอร์มหลังส่งสำเร็จ
+    form.reset();
+
+    // เล่นเสียงยืนยันความสำเร็จ
+    if (typeof playChimeSound === 'function') {
+      playChimeSound(880, 0.3); // High frequency success chime
+    }
+  });
+}

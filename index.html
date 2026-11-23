@@ -34,10 +34,12 @@
         <a href="#skills" class="nav-link">Skills</a>
         <a href="#projects" class="nav-link">Projects</a>
         <a href="#cost-estimator" class="nav-link">Estimator</a>
+        <a href="#contact" class="nav-link">Contact</a>
       </nav>
       <div class="header-actions">
+        <button id="themeToggleBtn" class="icon-btn theme-toggle-btn" title="สลับโหมดมืด/สว่าง (Dark/Light Mode)" aria-label="Toggle Dark/Light Mode">🌙</button>
         <button id="audioToggleBtn" class="icon-btn" title="Toggle Ambient Audio" aria-label="Toggle Audio">🔊</button>
-        <a href="#about" class="btn-nav-cta">Let's Talk ↗</a>
+        <a href="#contact" class="btn-nav-cta">Let's Talk ↗</a>
       </div>
     </header>
 
@@ -224,12 +226,29 @@
         <div class="section-header">
           <span class="section-eyebrow">PORTFOLIO WORK</span>
           <h2 class="section-title">Projects ผลงานที่พัฒนา</h2>
+          <p class="section-subtitle">ผลงานนวัตกรรม IoT และเว็บแอปพลิเคชันที่ลงมือพัฒนาจริง</p>
+        </div>
+
+        <!-- Project Filter Buttons (ระบบกรองผลงานตามหมวดหมู่) -->
+        <div class="project-filter-bar" role="tablist" aria-label="หมวดหมู่ผลงาน">
+          <button class="filter-btn active" data-filter="all" role="tab" aria-selected="true">
+            <span class="filter-icon">📂</span> ทั้งหมด (All)
+          </button>
+          <button class="filter-btn" data-filter="iot" role="tab" aria-selected="false">
+            <span class="filter-icon">⚡</span> IoT & Hardware
+          </button>
+          <button class="filter-btn" data-filter="web" role="tab" aria-selected="false">
+            <span class="filter-icon">💻</span> Web Application
+          </button>
         </div>
 
         <div class="projects-grid">
-          <!-- Project 1 -->
-          <article class="project-card">
-            <div class="project-tag">HARDWARE & IOT</div>
+          <!-- Project 1 (IoT & Hardware) -->
+          <article class="project-card" data-category="iot" data-project-id="smartfarm">
+            <div class="project-card-header">
+              <span class="project-tag">HARDWARE & IOT</span>
+              <span class="project-status-badge">Completed</span>
+            </div>
             <h3 class="project-title">1. ระบบ Smart Farm ด้วย ESP32</h3>
             <p class="project-description">
               พัฒนาโดยมีหน้าเว็บควบคุมและสามารถอ่านค่าเซนเซอร์บนหน้าเว็บที่ไหนก็ได้ พร้อมระบบควบคุมมอเตอร์รดน้ำอัตโนมัติ ติดตามสภาพแวดล้อม แปลงข้อมูลเป็นกราฟแบบเรียลไทม์
@@ -240,10 +259,16 @@
               <span>Web Dashboard</span>
               <span>Automation</span>
             </div>
+            <div class="project-card-actions">
+              <button class="btn-project-detail" data-project="smartfarm" title="เปิดดูรายละเอียดเชิงลึก">
+                <span>ดูรายละเอียด</span>
+                <span class="btn-icon">🔍</span>
+              </button>
+            </div>
           </article>
 
-          <!-- Project 2 -->
-          <article class="project-card">
+          <!-- Project 2 (Web Platform) -->
+          <article class="project-card" data-category="web" data-project-id="itacademy">
             <div class="project-card-header">
               <span class="project-tag">WEB PLATFORM</span>
               <a href="https://it-academy-online.vercel.app/" target="_blank" rel="noopener noreferrer" class="project-live-badge" title="เปิดเว็บไซต์ IT Academy ออนไลน์">
@@ -264,11 +289,63 @@
               <span>PHP</span>
               <span>Education</span>
             </div>
-            <div class="project-footer">
+            <div class="project-card-actions">
+              <button class="btn-project-detail" data-project="itacademy" title="เปิดดูรายละเอียดเชิงลึก">
+                <span>ดูรายละเอียด</span>
+                <span class="btn-icon">🔍</span>
+              </button>
               <a href="https://it-academy-online.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn-project-visit">
-                <span>เข้าชมเว็บไซต์จริง (it-academy-online)</span>
+                <span>เข้าชมจริง</span>
                 <span class="btn-arrow">↗</span>
               </a>
+            </div>
+          </article>
+
+          <!-- Project 3 (IoT & Smart Detection) -->
+          <article class="project-card" data-category="iot" data-project-id="smartdetect">
+            <div class="project-card-header">
+              <span class="project-tag">HARDWARE & IOT</span>
+              <span class="project-status-badge">Completed</span>
+            </div>
+            <h3 class="project-title">3. ระบบตรวจจับวัตถุอัจฉริยะ (Smart Detection)</h3>
+            <p class="project-description">
+              ระบบเซนเซอร์ตรวจจับความเคลื่อนไหวอัจฉริยะ เชื่อมต่อไมโครคอนโทรลเลอร์ส่งข้อมูลผ่านโพรโทคอล MQTT แจ้งเตือนความปลอดภัยแบบเรียลไทม์
+            </p>
+            <div class="project-tech-tags">
+              <span>ESP32</span>
+              <span>PIR Sensor</span>
+              <span>MQTT</span>
+              <span>IoT Security</span>
+            </div>
+            <div class="project-card-actions">
+              <button class="btn-project-detail" data-project="smartdetect" title="เปิดดูรายละเอียดเชิงลึก">
+                <span>ดูรายละเอียด</span>
+                <span class="btn-icon">🔍</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Project 4 (Web E-Commerce) -->
+          <article class="project-card" data-category="web" data-project-id="bloompetal">
+            <div class="project-card-header">
+              <span class="project-tag">WEB PLATFORM</span>
+              <span class="project-status-badge">Featured</span>
+            </div>
+            <h3 class="project-title">4. Bloom & Petal ร้านดอกไม้ออนไลน์</h3>
+            <p class="project-description">
+              เว็บแอปพลิเคชันระบบสั่งซื้อสินค้าออนไลน์สำหรับร้านดอกไม้ รองรับระบบตะกร้าสินค้า (Cart), ค้นหาสินค้า และออกแบบหน้าเว็บแบบ Responsive บนทุกอุปกรณ์
+            </p>
+            <div class="project-tech-tags">
+              <span>HTML5 / CSS3</span>
+              <span>JavaScript</span>
+              <span>Firebase Hosting</span>
+              <span>E-Commerce UI</span>
+            </div>
+            <div class="project-card-actions">
+              <button class="btn-project-detail" data-project="bloompetal" title="เปิดดูรายละเอียดเชิงลึก">
+                <span>ดูรายละเอียด</span>
+                <span class="btn-icon">🔍</span>
+              </button>
             </div>
           </article>
         </div>
@@ -318,6 +395,60 @@
           </div>
         </div>
       </section>
+
+      <!-- Section: Contact Form (แบบฟอร์มติดต่อพร้อมระบบตรวจสอบข้อมูล) -->
+      <section id="contact" class="section-card contact-section">
+        <div class="section-header">
+          <span class="section-eyebrow">GET IN TOUCH</span>
+          <h2 class="section-title">Contact แบบฟอร์มติดต่อ</h2>
+          <p class="section-subtitle">ส่งข้อความติดต่อ สอบถามข้อมูล หรือปรึกษาโปรเจกต์งานพัฒนาระบบ</p>
+        </div>
+
+        <div class="contact-container">
+          <form id="contactForm" class="contact-form" novalidate>
+            <div class="form-group">
+              <label for="contactName" class="form-label">
+                <span>ชื่อ-นามสกุล (Name)</span> <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <input type="text" id="contactName" name="name" class="form-control" placeholder="เช่น นายพงศกร เมืองประเทศ" required />
+                <span class="input-icon">👤</span>
+              </div>
+              <span class="form-error" id="nameError" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="contactEmail" class="form-label">
+                <span>อีเมล (Email)</span> <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <input type="email" id="contactEmail" name="email" class="form-control" placeholder="เช่น contact@example.com" required />
+                <span class="input-icon">✉️</span>
+              </div>
+              <span class="form-error" id="emailError" role="alert"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="contactMessage" class="form-label">
+                <span>ข้อความติดต่อ (Message)</span> <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <textarea id="contactMessage" name="message" rows="4" class="form-control" placeholder="พิมพ์รายละเอียดที่คุณต้องการติดต่อที่นี่..." required></textarea>
+                <span class="input-icon textarea-icon">💬</span>
+              </div>
+              <span class="form-error" id="messageError" role="alert"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit-contact">
+              <span>ส่งข้อความติดต่อ</span>
+              <span class="btn-icon">🚀</span>
+            </button>
+
+            <!-- Status Alert Box -->
+            <div id="contactStatus" class="contact-status-box" style="display: none;" role="status"></div>
+          </form>
+        </div>
+      </section>
     </main>
 
     <!-- Footer -->
@@ -328,5 +459,30 @@
         <p class="footer-sub">Designed with 3D Depth & Swarm Agents Choreography</p>
       </div>
     </footer>
+    <!-- Project Details Modal Popup (หน้าต่างแสดงรายละเอียดผลงานเพิ่มเติม) -->
+    <div id="projectModal" class="project-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-backdrop" id="modalBackdrop"></div>
+      <div class="modal-card">
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="ปิดหน้าต่าง">&times;</button>
+        <div class="modal-header">
+          <span class="modal-tag" id="modalTag">CATEGORY</span>
+          <h3 class="modal-title" id="modalTitle">Project Title</h3>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description" id="modalDesc">Detailed description here...</p>
+          <div class="modal-section-title">⚡ จุดเด่นสำคัญของผลงาน:</div>
+          <ul class="modal-highlights-list" id="modalHighlights"></ul>
+          <div class="modal-section-title">🛠️ เทคโนโลยีและเครื่องมือที่นำมาใช้:</div>
+          <div class="project-tech-tags" id="modalTechTags"></div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" id="modalLiveLink" style="display: none;">
+            <span>เปิดดูผลงานจริง</span>
+            <span class="btn-arrow">↗</span>
+          </a>
+          <button class="btn btn-secondary" id="modalCancelBtn">ปิดหน้าต่าง</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
