@@ -1054,6 +1054,8 @@ function bootApplication() {
   // Aperture Row Rotating Dials & 9-Blade Iris Calibration
   initAboutApertureIris();
   initApertureDials();
+  // Stride 3D Curved Arc Project Catalog Carousel
+  initStrideProjectCarousel();
 }
 
 window.addEventListener('load', () => {
@@ -1259,9 +1261,14 @@ function initProjectFilter() {
         }
       });
 
+      window.__projectSyncLock = true;
+      if (window.__catalogCarousel && typeof window.__catalogCarousel.setFilter === 'function') {
+        window.__catalogCarousel.setFilter(filterVal);
+      }
       if (window.__projectsDial && typeof window.__projectsDial.setFilter === 'function') {
         window.__projectsDial.setFilter(filterVal);
       }
+      window.__projectSyncLock = false;
 
       if (typeof playChimeSound === 'function') {
         playChimeSound(659.25, 0.15); // E5 chime
@@ -2129,6 +2136,8 @@ function initTelemetryBench() {
 function initCardHologramPhysics() {
   const cards = document.querySelectorAll('[data-card-hover]');
   cards.forEach(card => {
+    // Cards inside the Stride 3D arc carousel have their transform + tilt driven by StrideProjectCarousel
+    if (card.classList.contains('catalog-row-card')) return;
     card.addEventListener('pointermove', (e) => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -2338,179 +2347,295 @@ function initAboutApertureIris() {
 }
 
 /**
- * 2. Top-Down 3D Machined Studio Hardware SVG Models (Camera-Styled Aesthetic)
+ * 2. Portfolio Dev-Gear SVG Models (ESP32 boards, laptop, terminal, dashboards, devices)
+ * - Each model shows what the skill / project really is, styled in the crimson studio palette
  */
 function buildStudioModelSvg(modelId, uid) {
-  const metalId = `m_${uid}`;
-  const bezelId = `b_${uid}`;
-  const lensId = `l_${uid}`;
+  const pcbId = `pcb_${uid}`;
+  const aluId = `alu_${uid}`;
+  const scrId = `scr_${uid}`;
+  const areaId = `area_${uid}`;
+  const domeId = `dome_${uid}`;
+  const MONO = 'Consolas, &quot;JetBrains Mono&quot;, monospace';
+  const SANS = '&quot;Space Grotesk&quot;, &quot;Prompt&quot;, sans-serif';
 
-  const sharedDefs = `
+  const defs = `
     <defs>
-      <linearGradient id="${metalId}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#d4d8e0"/>
-        <stop offset="28%" stop-color="#8b929e"/>
-        <stop offset="55%" stop-color="#e8ecf2"/>
-        <stop offset="82%" stop-color="#5a606b"/>
-        <stop offset="100%" stop-color="#9ca3af"/>
+      <linearGradient id="${pcbId}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#1a1d2b"/>
+        <stop offset="100%" stop-color="#0c0e16"/>
       </linearGradient>
-      <radialGradient id="${bezelId}" cx="38%" cy="32%" r="72%">
-        <stop offset="0%" stop-color="#2c303a"/>
-        <stop offset="65%" stop-color="#13151b"/>
-        <stop offset="100%" stop-color="#090a0d"/>
-      </radialGradient>
-      <radialGradient id="${lensId}" cx="36%" cy="34%" r="68%">
-        <stop offset="0%" stop-color="#ff6b8b"/>
-        <stop offset="35%" stop-color="#e11d48"/>
-        <stop offset="72%" stop-color="#4c0519"/>
-        <stop offset="100%" stop-color="#0d0407"/>
+      <linearGradient id="${aluId}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#cfd4dc"/>
+        <stop offset="45%" stop-color="#8d939e"/>
+        <stop offset="100%" stop-color="#5c626d"/>
+      </linearGradient>
+      <linearGradient id="${scrId}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#11131c"/>
+        <stop offset="100%" stop-color="#07080d"/>
+      </linearGradient>
+      <linearGradient id="${areaId}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="rgba(255,45,85,0.45)"/>
+        <stop offset="100%" stop-color="rgba(255,45,85,0)"/>
+      </linearGradient>
+      <radialGradient id="${domeId}" cx="38%" cy="32%" r="70%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="70%" stop-color="#d7dce4"/>
+        <stop offset="100%" stop-color="#9aa3b2"/>
       </radialGradient>
     </defs>`;
 
-  const opticalCore = (cx, cy, rOuter, label) => `
-    <circle cx="${cx}" cy="${cy}" r="${rOuter}" fill="url(#${metalId})" stroke="#090a0d" stroke-width="2"/>
-    <circle cx="${cx}" cy="${cy}" r="${rOuter - 8}" fill="#12141a" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>
-    <circle cx="${cx}" cy="${cy}" r="${rOuter - 16}" fill="none" stroke="rgba(225,29,72,0.55)" stroke-width="1.4" stroke-dasharray="3 3"/>
-    <circle cx="${cx}" cy="${cy}" r="${rOuter - 24}" fill="url(#${lensId})" stroke="#1f232c" stroke-width="3"/>
-    <ellipse cx="${cx - rOuter * 0.22}" cy="${cy - rOuter * 0.22}" rx="${rOuter * 0.2}" ry="${rOuter * 0.12}" transform="rotate(-32 ${cx} ${cy})" fill="rgba(255,255,255,0.42)"/>
-    ${label ? `<text x="${cx}" y="${cy + rOuter - 2}" fill="#e2e8f0" font-family="Space Grotesk, monospace" font-size="8.5" font-weight="700" text-anchor="middle" letter-spacing="1.2">${label}</text>` : ''}
-  `;
+  const pinRow = (x0, y, count, step) =>
+    Array.from({ length: count }, (_, i) =>
+      `<rect x="${x0 + i * step}" y="${y}" width="7" height="7" rx="1.2" fill="#0a0b0f" stroke="#f5b041" stroke-width="1.4"/>`
+    ).join('');
+
+  const browserBar = (x, y, w, url) => `
+    <rect x="${x}" y="${y}" width="${w}" height="16" fill="#1b1d27"/>
+    <circle cx="${x + 9}" cy="${y + 8}" r="2.6" fill="#ff5f57"/>
+    <circle cx="${x + 17}" cy="${y + 8}" r="2.6" fill="#febc2e"/>
+    <circle cx="${x + 25}" cy="${y + 8}" r="2.6" fill="#28c840"/>
+    <rect x="${x + 36}" y="${y + 3.5}" width="${w - 48}" height="9" rx="4.5" fill="#0d0f16"/>
+    <text x="${x + 42}" y="${y + 10.6}" fill="#94a3b8" font-family="${MONO}" font-size="6.5">${url}</text>`;
 
   switch (modelId) {
+    /* ---------- SKILLS ---------- */
     case 'iot':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Tactical ESP32 Rangefinder Hardware Chassis -->
-        <rect x="44" y="40" width="272" height="162" rx="18" fill="url(#${metalId})" stroke="#0a0b0e" stroke-width="2"/>
-        <rect x="48" y="66" width="264" height="130" rx="12" fill="url(#${bezelId})"/>
-        <!-- Top Knurled Knobs & WiFi Ceramic Block -->
-        <rect x="70" y="28" width="44" height="16" rx="4" fill="#1b1d24" stroke="#9ca3af" stroke-width="1.2"/>
-        <rect x="242" y="28" width="48" height="16" rx="4" fill="#1b1d24" stroke="#9ca3af" stroke-width="1.2"/>
-        <rect x="132" y="45" width="96" height="16" rx="3" fill="#0d0e12" stroke="rgba(255,255,255,0.18)"/>
-        <text x="180" y="56" fill="#ff4d6d" font-family="Space Grotesk, monospace" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="2">ESP32 · IOT-32</text>
-        <!-- Brass GPIO Header Rails -->
-        <g fill="#f59e0b" opacity="0.9">
-          <rect x="58" y="82" width="12" height="6" rx="1"/><rect x="58" y="94" width="12" height="6" rx="1"/>
-          <rect x="58" y="106" width="12" height="6" rx="1"/><rect x="58" y="118" width="12" height="6" rx="1"/>
-          <rect x="290" y="82" width="12" height="6" rx="1"/><rect x="290" y="94" width="12" height="6" rx="1"/>
-          <rect x="290" y="106" width="12" height="6" rx="1"/><rect x="290" y="118" width="12" height="6" rx="1"/>
+      // ESP32 DevKit board, top-down
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <rect x="26" y="104" width="26" height="34" rx="4" fill="url(#${aluId})"/>
+        <rect x="31" y="113" width="16" height="16" rx="2" fill="#2a2d36"/>
+        <rect x="40" y="52" width="282" height="138" rx="12" fill="url(#${pcbId})" stroke="#2c3346" stroke-width="1.5"/>
+        <g stroke="rgba(245,176,65,0.32)" stroke-width="1.6" fill="none">
+          <path d="M60 121 H100 V100 H140"/><path d="M60 131 H112 V150 H190"/>
+          <path d="M160 80 V96 H196"/><path d="M160 162 V146 H196"/>
         </g>
-        <!-- Telemetry LED & Rangefinder Window -->
-        <rect x="78" y="46" width="32" height="14" rx="2" fill="#041c15" stroke="#10b981" stroke-width="1"/>
-        <circle cx="290" cy="53" r="4" fill="#ff2d55"/>
-        <!-- Center Precision Optical Sensor Aperture Lens -->
-        ${opticalCore(180, 134, 62, '240MHz · ADC')}
+        ${pinRow(58, 61, 19, 13.5)}
+        ${pinRow(58, 174, 19, 13.5)}
+        <rect x="66" y="88" width="26" height="18" rx="3" fill="#20232d" stroke="#3b4152"/>
+        <circle cx="79" cy="97" r="5" fill="#0d0e13"/>
+        <text x="79" y="117" fill="#6b7280" font-family="${MONO}" font-size="7" text-anchor="middle">EN</text>
+        <rect x="66" y="136" width="26" height="18" rx="3" fill="#20232d" stroke="#3b4152"/>
+        <circle cx="79" cy="145" r="5" fill="#0d0e13"/>
+        <text x="79" y="165" fill="#6b7280" font-family="${MONO}" font-size="7" text-anchor="middle">BOOT</text>
+        <rect x="112" y="104" width="34" height="34" rx="3" fill="#0b0c10" stroke="#3b4152"/>
+        <text x="129" y="124" fill="#9ca3af" font-family="${MONO}" font-size="6.5" text-anchor="middle">CP2102</text>
+        <circle cx="166" cy="96" r="4" fill="#ff2d55"><animate attributeName="opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/></circle>
+        <circle cx="166" cy="96" r="9" fill="rgba(255,45,85,0.25)"/>
+        <rect x="190" y="76" width="118" height="90" rx="5" fill="#0b0c10" stroke="#3b4152"/>
+        <rect x="196" y="82" width="78" height="78" rx="3" fill="url(#${aluId})"/>
+        <text x="235" y="114" fill="#1f2937" font-family="${SANS}" font-size="13" font-weight="700" text-anchor="middle">ESP32</text>
+        <text x="235" y="128" fill="#374151" font-family="${MONO}" font-size="7" text-anchor="middle">WROOM-32</text>
+        <text x="235" y="140" fill="#4b5563" font-family="${MONO}" font-size="6" text-anchor="middle">WiFi · BLE · 240MHz</text>
+        <path d="M280 86 h20 v8 h-20 v8 h20 v8 h-20 v8 h20 v8 h-20 v8 h20" fill="none" stroke="#f5b041" stroke-width="2"/>
+        <text x="58" y="210" fill="#ff4d6d" font-family="${MONO}" font-size="9" font-weight="700" letter-spacing="1.5">ESP32-DEVKIT · IOT</text>
       </svg>`;
 
     case 'web':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Fullstack Dark-Glass Console Unit -->
-        <rect x="34" y="34" width="292" height="174" rx="16" fill="url(#${metalId})"/>
-        <rect x="42" y="44" width="276" height="154" rx="10" fill="url(#${bezelId})"/>
-        <!-- Glowing Viewport Screen -->
-        <rect x="56" y="56" width="174" height="106" rx="8" fill="#050811" stroke="rgba(56,189,248,0.4)" stroke-width="1.4"/>
-        <text x="143" y="94" fill="#38bdf8" font-family="Space Grotesk, monospace" font-size="18" font-weight="700" text-anchor="middle">&lt;APP /&gt;</text>
-        <text x="143" y="115" fill="#94a3b8" font-family="Space Grotesk, monospace" font-size="9" text-anchor="middle" letter-spacing="1.8">HTML5 · CSS3 · ES6+</text>
-        <rect x="72" y="132" width="142" height="6" rx="3" fill="rgba(225,29,72,0.28)"/>
-        <rect x="72" y="132" width="96" height="6" rx="3" fill="#ff2d55"/>
-        <!-- Machined Optical Rotary Jog Dial on Right -->
-        ${opticalCore(272, 118, 44, '')}
-        <!-- Bottom Mechanical Tactile Keycaps -->
-        <g>
-          <rect x="58" y="172" width="38" height="16" rx="4" fill="#1e2029" stroke="rgba(255,255,255,0.18)"/>
-          <rect x="104" y="172" width="38" height="16" rx="4" fill="#1e2029" stroke="rgba(255,255,255,0.18)"/>
-          <rect x="150" y="172" width="38" height="16" rx="4" fill="#e11d48"/>
-          <rect x="196" y="172" width="38" height="16" rx="4" fill="#1e2029" stroke="rgba(255,255,255,0.18)"/>
+      // Open laptop with portfolio code
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <rect x="68" y="16" width="224" height="158" rx="11" fill="#17181f" stroke="#2c2e38" stroke-width="1.5"/>
+        <rect x="78" y="26" width="204" height="138" rx="4" fill="url(#${scrId})"/>
+        ${browserBar(78, 26, 204, 'pongsakorn.dev')}
+        <rect x="90" y="52" width="78" height="9" rx="2" fill="#ff2d55"/>
+        <rect x="90" y="66" width="120" height="5" rx="2" fill="#475569"/>
+        <g font-family="${MONO}" font-size="7.5">
+          <text x="90" y="88" fill="#ff4d6d">&lt;section</text><text x="132" y="88" fill="#38bdf8">id=</text><text x="148" y="88" fill="#fbbf24">"hero"</text><text x="180" y="88" fill="#ff4d6d">&gt;</text>
+          <text x="98" y="100" fill="#c084fc">const</text><text x="124" y="100" fill="#e2e8f0">app = </text><text x="152" y="100" fill="#38bdf8">init</text><text x="168" y="100" fill="#e2e8f0">();</text>
+          <text x="98" y="112" fill="#34d399">fetch</text><text x="124" y="112" fill="#e2e8f0">(</text><text x="129" y="112" fill="#fbbf24">'/api/projects'</text><text x="200" y="112" fill="#e2e8f0">)</text>
+          <text x="90" y="124" fill="#ff4d6d">&lt;/section&gt;</text>
         </g>
+        <rect x="222" y="80" width="48" height="56" rx="5" fill="#141722" stroke="rgba(255,45,85,0.4)"/>
+        <rect x="228" y="86" width="36" height="22" rx="3" fill="rgba(255,45,85,0.25)"/>
+        <rect x="228" y="113" width="28" height="4" rx="2" fill="#64748b"/>
+        <rect x="228" y="121" width="20" height="4" rx="2" fill="#64748b"/>
+        <rect x="90" y="140" width="46" height="12" rx="6" fill="#ff2d55"/>
+        <path d="M30 174 H330 L346 194 Q348 200 340 200 H20 Q12 200 14 194 Z" fill="url(#${aluId})"/>
+        <rect x="156" y="174" width="48" height="5" rx="2.5" fill="#4b5160"/>
+        <rect x="14" y="200" width="332" height="4" rx="2" fill="#3f444f"/>
       </svg>`;
 
     case 'sys':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Twin-Lens Reflex Inspired Vertical Server & Linux Chassis -->
-        <rect x="104" y="16" width="152" height="210" rx="16" fill="url(#${metalId})"/>
-        <rect x="112" y="24" width="136" height="194" rx="12" fill="url(#${bezelId})"/>
-        <!-- Top Ground-Glass Terminal Screen Hood -->
-        <rect x="128" y="34" width="104" height="36" rx="4" fill="#07110d" stroke="rgba(16,185,129,0.5)" stroke-width="1.4"/>
-        <text x="180" y="56" fill="#34d399" font-family="Space Grotesk, monospace" font-size="11" font-weight="700" text-anchor="middle">&gt;_ LINUX · GIT</text>
-        <!-- Twin Vertically Stacked Optical/Platter Lenses -->
-        ${opticalCore(180, 112, 34, '')}
-        ${opticalCore(180, 174, 38, 'SSH · TLS')}
-        <!-- Side CNC Crank -->
-        <rect x="256" y="102" width="16" height="44" rx="5" fill="url(#${metalId})"/>
-        <circle cx="264" cy="124" r="10" fill="#181a22" stroke="#cbd5e1" stroke-width="1.5"/>
+      // Linux terminal with git workflow
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <rect x="40" y="24" width="280" height="194" rx="12" fill="#0a0d12" stroke="rgba(52,211,153,0.35)" stroke-width="1.5"/>
+        <rect x="40" y="24" width="280" height="26" rx="12" fill="#151a23"/>
+        <rect x="40" y="40" width="280" height="10" fill="#151a23"/>
+        <circle cx="56" cy="37" r="4" fill="#ff5f57"/><circle cx="69" cy="37" r="4" fill="#febc2e"/><circle cx="82" cy="37" r="4" fill="#28c840"/>
+        <text x="180" y="41" fill="#94a3b8" font-family="${MONO}" font-size="9" text-anchor="middle">kitt@ubuntu: ~/portfolio</text>
+        <g font-family="${MONO}" font-size="10.5">
+          <text x="56" y="74"><tspan fill="#34d399">$</tspan><tspan fill="#e2e8f0"> git status</tspan></text>
+          <text x="56" y="92" fill="#64748b">On branch main · working tree clean</text>
+          <text x="56" y="114"><tspan fill="#34d399">$</tspan><tspan fill="#e2e8f0"> git push origin main</tspan></text>
+          <text x="56" y="132" fill="#64748b">Writing objects: 100% (24/24) done</text>
+          <text x="56" y="154"><tspan fill="#34d399">$</tspan><tspan fill="#e2e8f0"> sudo systemctl status nginx</tspan></text>
+          <text x="56" y="172"><tspan fill="#34d399">●</tspan><tspan fill="#a7f3d0"> active (running)</tspan></text>
+          <text x="56" y="196"><tspan fill="#34d399">$</tspan><tspan fill="#e2e8f0"> </tspan></text>
+        </g>
+        <rect x="72" y="186" width="8" height="13" fill="#34d399"><animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/></rect>
+        <rect x="250" y="160" width="56" height="44" rx="6" fill="#141922" stroke="rgba(255,45,85,0.5)"/>
+        <text x="278" y="179" fill="#ff4d6d" font-family="${MONO}" font-size="9" font-weight="700" text-anchor="middle">GIT</text>
+        <text x="278" y="193" fill="#94a3b8" font-family="${MONO}" font-size="7" text-anchor="middle">main ✔</text>
       </svg>`;
 
     case 'telemetry':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Oscilloscope & Radar Calibration Instrument Rig -->
-        <rect x="50" y="42" width="260" height="158" rx="20" fill="url(#${metalId})"/>
-        <rect x="58" y="50" width="244" height="142" rx="14" fill="url(#${bezelId})"/>
-        <!-- Side Rangefinder Gauges -->
-        <rect x="70" y="64" width="66" height="114" rx="8" fill="#050b0a" stroke="rgba(255,255,255,0.12)"/>
-        <path d="M 76 120 Q 90 88 103 120 T 130 120" fill="none" stroke="#ff2d55" stroke-width="2.4"/>
-        <text x="103" y="158" fill="#38bdf8" font-family="Space Grotesk, monospace" font-size="9" font-weight="700" text-anchor="middle">100.4Hz</text>
-        <!-- Large Protruding Optical Telemetry Barrel -->
-        ${opticalCore(214, 121, 64, 'MQTT v5')}
+      // Live MQTT monitoring dashboard tablet
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <rect x="30" y="22" width="300" height="196" rx="16" fill="#15161d" stroke="#2c2e38" stroke-width="1.5"/>
+        <rect x="40" y="32" width="280" height="176" rx="9" fill="url(#${scrId})"/>
+        <circle cx="54" cy="46" r="3.5" fill="#34d399"><animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/></circle>
+        <text x="63" y="49" fill="#e2e8f0" font-family="${MONO}" font-size="8.5" font-weight="700">MQTT · LIVE TELEMETRY</text>
+        <text x="306" y="49" fill="#64748b" font-family="${MONO}" font-size="7.5" text-anchor="end">QoS 1 · TLS</text>
+        <g stroke="rgba(255,255,255,0.06)">
+          <line x1="52" y1="80" x2="216" y2="80"/><line x1="52" y1="104" x2="216" y2="104"/>
+          <line x1="52" y1="128" x2="216" y2="128"/><line x1="52" y1="152" x2="216" y2="152"/>
+        </g>
+        <path d="M52 140 L72 126 L92 132 L112 104 L132 112 L152 88 L172 98 L192 76 L216 84 L216 160 L52 160 Z" fill="url(#${areaId})"/>
+        <polyline points="52,140 72,126 92,132 112,104 132,112 152,88 172,98 192,76 216,84" fill="none" stroke="#ff2d55" stroke-width="2.4" stroke-linejoin="round"/>
+        <circle cx="216" cy="84" r="4" fill="#ff2d55"/>
+        <rect x="228" y="64" width="80" height="46" rx="7" fill="#11141d" stroke="rgba(56,189,248,0.3)"/>
+        <text x="236" y="80" fill="#64748b" font-family="${MONO}" font-size="7">SOIL</text>
+        <text x="236" y="100" fill="#38bdf8" font-family="${SANS}" font-size="17" font-weight="700">68.5%</text>
+        <rect x="228" y="116" width="80" height="46" rx="7" fill="#11141d" stroke="rgba(255,45,85,0.3)"/>
+        <text x="236" y="132" fill="#64748b" font-family="${MONO}" font-size="7">TEMP</text>
+        <text x="236" y="152" fill="#ff4d6d" font-family="${SANS}" font-size="17" font-weight="700">29.4°C</text>
+        <g fill="#2a2f3d">
+          <rect x="52" y="176" width="12" height="20" rx="2"/><rect x="70" y="170" width="12" height="26" rx="2"/>
+          <rect x="88" y="180" width="12" height="16" rx="2"/><rect x="106" y="166" width="12" height="30" rx="2" fill="#ff2d55"/>
+          <rect x="124" y="174" width="12" height="22" rx="2"/><rect x="142" y="178" width="12" height="18" rx="2"/>
+        </g>
+        <text x="308" y="194" fill="#34d399" font-family="${MONO}" font-size="8" text-anchor="end">LATENCY 14ms</text>
       </svg>`;
 
+    /* ---------- PROJECTS ---------- */
     case 'smartfarm':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Smart Farm ESP32 Weatherproof Studio Rig -->
-        <rect x="42" y="34" width="276" height="174" rx="20" fill="url(#${metalId})"/>
-        <rect x="50" y="42" width="260" height="158" rx="14" fill="url(#${bezelId})"/>
-        <!-- Top Status Badge -->
-        <rect x="70" y="54" width="120" height="18" rx="4" fill="#041912" stroke="rgba(16,185,129,0.5)"/>
-        <circle cx="82" cy="63" r="3.5" fill="#10b981"/>
-        <text x="136" y="66" fill="#6ee7b7" font-family="Space Grotesk, monospace" font-size="8.5" font-weight="700" text-anchor="middle">SOIL: 68.5% · PUMP AUTO</text>
-        <!-- Main Environmental Optical Sensor Barrel -->
-        ${opticalCore(130, 134, 52, 'DHT22 · ADC')}
-        <!-- Solid State Pump Relay & ESP32 Core Module on Right -->
-        <rect x="206" y="60" width="88" height="122" rx="8" fill="#14161e" stroke="rgba(225,29,72,0.4)"/>
-        <rect x="218" y="72" width="64" height="44" rx="4" fill="#0b0c10" stroke="#9ca3af" stroke-width="1"/>
-        <text x="250" y="98" fill="#f8fafc" font-family="Space Grotesk, monospace" font-size="9" font-weight="700" text-anchor="middle">ESP32</text>
-        <circle cx="232" cy="148" r="12" fill="#d97706" stroke="#fde68a" stroke-width="1.5"/>
-        <circle cx="268" cy="148" r="12" fill="#e11d48" stroke="#fda4af" stroke-width="1.5"/>
+      // Plant pot + soil sensor + ESP32 OLED + water pump
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <path d="M118 128 C110 96 92 82 70 78 C78 100 92 116 118 128 Z" fill="#10b981"/>
+        <path d="M122 126 C128 90 150 70 176 66 C166 94 148 114 122 126 Z" fill="#059669"/>
+        <path d="M120 130 C116 104 120 84 128 62" fill="none" stroke="#047857" stroke-width="3"/>
+        <path d="M126 92 C138 84 150 82 160 84" fill="none" stroke="#065f46" stroke-width="1.4"/>
+        <rect x="144" y="94" width="24" height="20" rx="3" fill="#1e2433" stroke="#475569"/>
+        <rect x="148" y="112" width="5" height="34" rx="2" fill="#f5b041"/>
+        <rect x="159" y="112" width="5" height="34" rx="2" fill="#f5b041"/>
+        <path d="M168 102 C200 100 200 70 222 72" fill="none" stroke="#ff2d55" stroke-width="2.4"/>
+        <rect x="62" y="126" width="120" height="16" rx="5" fill="#9a3412"/>
+        <path d="M68 140 H176 L164 214 Q163 220 156 220 H88 Q81 220 80 214 Z" fill="#7c2d12"/>
+        <rect x="68" y="128" width="108" height="6" rx="3" fill="#2b1a12"/>
+        <rect x="212" y="52" width="124" height="96" rx="10" fill="url(#${pcbId})" stroke="#2c3346" stroke-width="1.5"/>
+        ${pinRow(222, 58, 8, 13.5)}
+        <rect x="224" y="74" width="66" height="40" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1"/>
+        <text x="232" y="90" fill="#38bdf8" font-family="${MONO}" font-size="8">SOIL 68%</text>
+        <text x="232" y="104" fill="#34d399" font-family="${MONO}" font-size="8">PUMP AUTO</text>
+        <rect x="298" y="78" width="28" height="30" rx="3" fill="url(#${aluId})"/>
+        <text x="312" y="96" fill="#1f2937" font-family="${MONO}" font-size="6" font-weight="700" text-anchor="middle">ESP32</text>
+        <circle cx="232" cy="130" r="3.5" fill="#34d399"><animate attributeName="opacity" values="1;0.3;1" dur="1.4s" repeatCount="indefinite"/></circle>
+        <text x="242" y="133" fill="#94a3b8" font-family="${MONO}" font-size="7">WiFi · Dashboard</text>
+        <rect x="236" y="168" width="78" height="40" rx="8" fill="#101521" stroke="rgba(56,189,248,0.4)"/>
+        <text x="275" y="186" fill="#e2e8f0" font-family="${MONO}" font-size="8" font-weight="700" text-anchor="middle">WATER PUMP</text>
+        <text x="275" y="199" fill="#34d399" font-family="${MONO}" font-size="7.5" text-anchor="middle">● ON</text>
+        <path d="M236 188 C206 188 196 150 178 132" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-dasharray="5 4">
+          <animate attributeName="stroke-dashoffset" values="18;0" dur="0.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M184 118 C188 124 190 128 186 132 C182 135 177 132 178 127 C179 124 182 121 184 118 Z" fill="#38bdf8"/>
       </svg>`;
 
     case 'itacademy':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- IT Academy Web Workstation Rig -->
-        <rect x="38" y="30" width="284" height="182" rx="16" fill="url(#${metalId})"/>
-        <rect x="46" y="38" width="268" height="166" rx="11" fill="url(#${bezelId})"/>
-        <rect x="60" y="52" width="240" height="124" rx="8" fill="#070a13" stroke="rgba(255,45,85,0.4)" stroke-width="1.4"/>
-        <!-- Mini Educational Dashboard UI inside Hardware Frame -->
-        <rect x="74" y="64" width="212" height="18" rx="4" fill="rgba(225,29,72,0.18)"/>
-        <circle cx="86" cy="73" r="3.5" fill="#10b981"/>
-        <text x="148" y="76" fill="#ffffff" font-family="Space Grotesk, monospace" font-size="8.5" font-weight="700" text-anchor="middle">IT ACADEMY · VERCEL LIVE</text>
-        <rect x="74" y="92" width="64" height="70" rx="5" fill="#111625" stroke="rgba(56,189,248,0.35)"/>
-        <rect x="148" y="92" width="64" height="70" rx="5" fill="#111625" stroke="rgba(255,45,85,0.35)"/>
-        <rect x="222" y="92" width="64" height="70" rx="5" fill="#111625" stroke="rgba(16,185,129,0.35)"/>
-        <circle cx="180" cy="188" r="7" fill="url(#${metalId})"/>
+      // Desktop monitor showing the IT Academy website
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <rect x="44" y="14" width="272" height="172" rx="11" fill="#16171e" stroke="#2c2e38" stroke-width="1.5"/>
+        <rect x="52" y="22" width="256" height="154" rx="4" fill="url(#${scrId})"/>
+        ${browserBar(52, 22, 256, 'it-academy-online.vercel.app')}
+        <text x="64" y="54" fill="#ff4d6d" font-family="${SANS}" font-size="10" font-weight="700" letter-spacing="1">IT ACADEMY</text>
+        <g fill="#64748b"><rect x="196" y="47" width="22" height="5" rx="2"/><rect x="224" y="47" width="22" height="5" rx="2"/><rect x="252" y="47" width="22" height="5" rx="2"/></g>
+        <rect x="280" y="44" width="20" height="11" rx="5.5" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="0.8"/>
+        <text x="290" y="52" fill="#34d399" font-family="${MONO}" font-size="5.5" text-anchor="middle">LIVE</text>
+        <text x="64" y="76" fill="#f8fafc" font-family="${SANS}" font-size="13" font-weight="700">Learn IT · Start Today</text>
+        <rect x="64" y="82" width="112" height="4" rx="2" fill="#475569"/>
+        <g font-family="${MONO}" font-size="7" font-weight="700">
+          <rect x="64" y="98" width="72" height="62" rx="6" fill="#121726" stroke="rgba(255,45,85,0.4)"/>
+          <rect x="64" y="98" width="72" height="5" rx="2" fill="#ff2d55"/>
+          <text x="72" y="122" fill="#ff4d6d">IoT</text><rect x="72" y="130" width="52" height="4" rx="2" fill="#334155"/><rect x="72" y="139" width="36" height="4" rx="2" fill="#334155"/>
+          <rect x="144" y="98" width="72" height="62" rx="6" fill="#121726" stroke="rgba(56,189,248,0.4)"/>
+          <rect x="144" y="98" width="72" height="5" rx="2" fill="#38bdf8"/>
+          <text x="152" y="122" fill="#38bdf8">NETWORK</text><rect x="152" y="130" width="52" height="4" rx="2" fill="#334155"/><rect x="152" y="139" width="36" height="4" rx="2" fill="#334155"/>
+          <rect x="224" y="98" width="72" height="62" rx="6" fill="#121726" stroke="rgba(52,211,153,0.4)"/>
+          <rect x="224" y="98" width="72" height="5" rx="2" fill="#34d399"/>
+          <text x="232" y="122" fill="#34d399">WEB APP</text><rect x="232" y="130" width="52" height="4" rx="2" fill="#334155"/><rect x="232" y="139" width="36" height="4" rx="2" fill="#334155"/>
+        </g>
+        <path d="M166 186 H194 L198 210 H162 Z" fill="url(#${aluId})"/>
+        <rect x="122" y="208" width="116" height="10" rx="5" fill="url(#${aluId})"/>
       </svg>`;
 
     case 'smartdetect':
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- PIR Optical Motion Radar Camera Rig -->
-        <rect x="52" y="40" width="256" height="162" rx="22" fill="url(#${metalId})"/>
-        <rect x="60" y="48" width="240" height="146" rx="16" fill="url(#${bezelId})"/>
-        <!-- Center PIR Fresnel Dome + Radar Pulse Rings -->
-        <circle cx="180" cy="121" r="64" fill="#1a1c24" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-        <circle cx="180" cy="121" r="52" fill="url(#${lensId})"/>
-        <polygon points="180,74 222,121 180,168 138,121" fill="none" stroke="rgba(255,255,255,0.32)" stroke-width="1.2"/>
-        <circle cx="180" cy="121" r="24" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
-        <circle cx="90" cy="74" r="6" fill="#ff2d55"/>
-        <text x="268" y="78" fill="#cbd5e1" font-family="Space Grotesk, monospace" font-size="8.5" font-weight="700" text-anchor="end">PIR-IR</text>
+      // HC-SR501 PIR sensor module with detection waves + alert
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <g fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round">
+          <path d="M104 92 Q86 121 104 150" opacity="0.85"/>
+          <path d="M88 78 Q62 121 88 164" opacity="0.55"/>
+          <path d="M72 64 Q38 121 72 178" opacity="0.28"/>
+        </g>
+        <rect x="116" y="58" width="128" height="128" rx="9" fill="#0f3a2c" stroke="#1f6f52" stroke-width="1.5"/>
+        <circle cx="128" cy="70" r="3" fill="#0a0b0f" stroke="#9ca3af"/><circle cx="232" cy="70" r="3" fill="#0a0b0f" stroke="#9ca3af"/>
+        <circle cx="128" cy="174" r="3" fill="#0a0b0f" stroke="#9ca3af"/><circle cx="232" cy="174" r="3" fill="#0a0b0f" stroke="#9ca3af"/>
+        <circle cx="180" cy="118" r="50" fill="url(#${domeId})" stroke="#94a3b8" stroke-width="1.2"/>
+        <g fill="none" stroke="rgba(71,85,105,0.35)" stroke-width="1">
+          <circle cx="180" cy="118" r="36"/><circle cx="180" cy="118" r="22"/>
+          <line x1="130" y1="118" x2="230" y2="118"/><line x1="180" y1="68" x2="180" y2="168"/>
+          <line x1="145" y1="83" x2="215" y2="153"/><line x1="215" y1="83" x2="145" y2="153"/>
+        </g>
+        <ellipse cx="164" cy="98" rx="12" ry="7" transform="rotate(-30 164 98)" fill="rgba(255,255,255,0.75)"/>
+        ${pinRow(162, 192, 3, 14)}
+        <text x="180" y="214" fill="#64748b" font-family="${MONO}" font-size="7" text-anchor="middle">VCC · OUT · GND</text>
+        <rect x="256" y="66" width="92" height="52" rx="9" fill="#1a0b11" stroke="#ff2d55" stroke-width="1.4"/>
+        <text x="266" y="86" fill="#ff4d6d" font-family="${MONO}" font-size="9" font-weight="700">⚠ MOTION</text>
+        <text x="266" y="101" fill="#94a3b8" font-family="${MONO}" font-size="7">MQTT → Mobile</text>
+        <text x="266" y="111" fill="#64748b" font-family="${MONO}" font-size="6.5">just now</text>
+        <circle cx="338" cy="76" r="4" fill="#ff2d55"><animate attributeName="opacity" values="1;0.2;1" dur="0.9s" repeatCount="indefinite"/></circle>
+        <rect x="256" y="128" width="92" height="30" rx="8" fill="#0f141f" stroke="rgba(52,211,153,0.4)"/>
+        <text x="266" y="147" fill="#34d399" font-family="${MONO}" font-size="7.5">ARMED · 24/7</text>
       </svg>`;
 
     case 'bloompetal':
     default:
-      return `<svg viewBox="0 0 360 242" aria-hidden="true">${sharedDefs}
-        <!-- Bloom & Petal Studio Display & Color Puck -->
-        <rect x="40" y="34" width="280" height="174" rx="18" fill="url(#${metalId})"/>
-        <rect x="48" y="42" width="264" height="158" rx="12" fill="url(#${bezelId})"/>
-        <rect x="62" y="56" width="166" height="130" rx="8" fill="#180a10" stroke="rgba(255,77,109,0.45)"/>
-        <text x="145" y="114" fill="#fda4af" font-family="Barlow Condensed, sans-serif" font-size="22" font-weight="700" text-anchor="middle" letter-spacing="1.5">BLOOM &amp; PETAL</text>
-        <text x="145" y="134" fill="#94a3b8" font-family="Space Grotesk, monospace" font-size="8" text-anchor="middle">E-COMMERCE · RESPONSIVE UI</text>
-        ${opticalCore(268, 121, 42, 'CART UI')}
+      // Smartphone flower shop UI + cart card
+      return `<svg viewBox="0 0 360 242" aria-hidden="true">${defs}
+        <g transform="rotate(-6 70 120)">
+          <rect x="22" y="78" width="88" height="62" rx="9" fill="#15161d" stroke="#2c2e38"/>
+          <text x="32" y="100" fill="#fbbf24" font-family="${SANS}" font-size="11" font-weight="700">★ 4.9</text>
+          <text x="32" y="114" fill="#94a3b8" font-family="${MONO}" font-size="7">1,240 reviews</text>
+          <rect x="32" y="122" width="58" height="5" rx="2.5" fill="#334155"/>
+        </g>
+        <rect x="128" y="6" width="104" height="230" rx="19" fill="#121318" stroke="#2c2e38" stroke-width="1.5"/>
+        <rect x="134" y="12" width="92" height="218" rx="14" fill="#17090f"/>
+        <rect x="164" y="16" width="32" height="7" rx="3.5" fill="#0a0b0f"/>
+        <text x="142" y="40" fill="#fda4af" font-family="${SANS}" font-size="9" font-weight="700">Bloom&amp;Petal</text>
+        <path d="M204 32 h3 l2 8 h9 l2-6 h-12" fill="none" stroke="#f8fafc" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="219" cy="31" r="4.5" fill="#ff2d55"/><text x="219" y="33.5" fill="#fff" font-family="${SANS}" font-size="6" font-weight="700" text-anchor="middle">2</text>
+        <rect x="142" y="48" width="76" height="76" rx="9" fill="#2a0f19"/>
+        <path d="M180 112 V92" stroke="#10b981" stroke-width="2.4"/>
+        <ellipse cx="172" cy="104" rx="7" ry="3.5" transform="rotate(-30 172 104)" fill="#10b981"/>
+        <g fill="#ff4d6d">
+          <circle cx="180" cy="70" r="8"/><circle cx="191" cy="78" r="8"/><circle cx="187" cy="90" r="8"/>
+          <circle cx="173" cy="90" r="8"/><circle cx="169" cy="78" r="8"/>
+        </g>
+        <circle cx="180" cy="81" r="6" fill="#fbbf24"/>
+        <text x="142" y="140" fill="#f8fafc" font-family="${SANS}" font-size="9" font-weight="700">Rose Bouquet</text>
+        <text x="142" y="154" fill="#ff4d6d" font-family="${SANS}" font-size="10" font-weight="700">฿590</text>
+        <rect x="142" y="164" width="76" height="20" rx="10" fill="#ff2d55"/>
+        <text x="180" y="177" fill="#ffffff" font-family="${SANS}" font-size="7.5" font-weight="700" text-anchor="middle">ADD TO CART</text>
+        <g fill="#2a0f19"><rect x="142" y="192" width="22" height="22" rx="5"/><rect x="169" y="192" width="22" height="22" rx="5"/><rect x="196" y="192" width="22" height="22" rx="5"/></g>
+        <circle cx="153" cy="203" r="5" fill="#f9a8d4"/><circle cx="180" cy="203" r="5" fill="#fde68a"/><circle cx="207" cy="203" r="5" fill="#c4b5fd"/>
+        <g transform="rotate(5 296 120)">
+          <rect x="248" y="70" width="96" height="98" rx="10" fill="#15161d" stroke="rgba(255,45,85,0.45)"/>
+          <text x="258" y="90" fill="#e2e8f0" font-family="${MONO}" font-size="8" font-weight="700">CART · 2</text>
+          <rect x="258" y="98" width="76" height="4" rx="2" fill="#334155"/>
+          <rect x="258" y="108" width="56" height="4" rx="2" fill="#334155"/>
+          <text x="258" y="132" fill="#94a3b8" font-family="${MONO}" font-size="7">Total</text>
+          <text x="334" y="132" fill="#ff4d6d" font-family="${SANS}" font-size="10" font-weight="700" text-anchor="end">฿1,180</text>
+          <rect x="258" y="142" width="76" height="16" rx="8" fill="rgba(255,45,85,0.2)" stroke="#ff2d55" stroke-width="0.8"/>
+          <text x="296" y="153" fill="#ff4d6d" font-family="${MONO}" font-size="7" font-weight="700" text-anchor="middle">CHECKOUT</text>
+        </g>
       </svg>`;
   }
 }
@@ -2530,7 +2655,7 @@ function buildPropAccessorySvg(propType) {
     ui: `<svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="36" rx="6" fill="#1e1b2e" stroke="#e11d48" stroke-width="2"/><rect x="16" y="20" width="14" height="24" rx="2" fill="#ff2d55" opacity="0.8"/><rect x="34" y="20" width="14" height="10" rx="2" fill="#38bdf8"/><rect x="34" y="34" width="14" height="10" rx="2" fill="#cbd5e1"/></svg>`,
     term: `<svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="36" rx="6" fill="#090d16" stroke="#10b981" stroke-width="2"/><text x="32" y="37" fill="#34d399" font-size="16" font-weight="bold" font-family="monospace" text-anchor="middle">&gt;_</text></svg>`,
     git: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#181920" stroke="#e11d48" stroke-width="2"/><circle cx="24" cy="22" r="4" fill="#ff4d6d"/><circle cx="24" cy="42" r="4" fill="#38bdf8"/><circle cx="40" cy="32" r="4" fill="#10b981"/><path d="M24 26v12M24 26c6 0 12 2 12 6" stroke="#e2e8f0" stroke-width="2" fill="none"/></svg>`,
-    usb: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#1c1f26" stroke="#cbd5e1" stroke-width="2.2"/><circle cx="32" cy="32" r="10" fill="#e11d48"/></svg>`,
+    usb: `<svg viewBox="0 0 64 64"><rect x="18" y="8" width="28" height="18" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.8"/><rect x="24" y="13" width="5" height="6" rx="1" fill="#1e293b"/><rect x="35" y="13" width="5" height="6" rx="1" fill="#1e293b"/><rect x="14" y="25" width="36" height="26" rx="6" fill="#161822" stroke="#e11d48" stroke-width="2"/><text x="32" y="41" fill="#f8fafc" font-size="9" font-weight="bold" font-family="monospace" text-anchor="middle">USB-C</text><rect x="28" y="51" width="8" height="7" rx="2" fill="#64748b"/></svg>`,
     cloud: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/><text x="32" y="36" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace" text-anchor="middle">TLS</text></svg>`,
     wave: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#071310" stroke="#10b981" stroke-width="2"/><path d="M14 32 Q23 16 32 32 T50 32" stroke="#ff2d55" stroke-width="3" fill="none"/></svg>`,
     pir: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#e2e8f0" stroke="#475569" stroke-width="2.5"/><polygon points="32,14 48,32 32,50 16,32" fill="none" stroke="#64748b" stroke-width="1.5"/><circle cx="32" cy="32" r="6" fill="#e11d48"/></svg>`,
@@ -3395,6 +3520,11 @@ function initApertureDials() {
       catalogCards.forEach(card => {
         card.classList.toggle('dial-selected', card.getAttribute('data-project-id') === item.id);
       });
+      if (!window.__projectSyncLock && window.__catalogCarousel && typeof window.__catalogCarousel.goToProjectId === 'function') {
+        window.__projectSyncLock = true;
+        window.__catalogCarousel.goToProjectId(item.id, { fromDial: true });
+        window.__projectSyncLock = false;
+      }
     },
     onActiveItemClick: (item) => {
       if (inspectBtn) {
@@ -3403,19 +3533,668 @@ function initApertureDials() {
       }
     }
   });
+}
 
-  // Wire catalog card clicks to smoothly turn the rotating project dial
-  catalogCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('button, a, .xray-card-preview')) return;
-      const projId = card.getAttribute('data-project-id');
-      if (!window.__projectsDial) return;
-      const matchIdx = window.__projectsDial.items.findIndex(it => it.id === projId);
-      if (matchIdx !== -1) {
-        window.__projectsDial.goTo(matchIdx);
+/* ==========================================================================
+   Part 10: Stride-Inspired 3D Curved Arc Project Catalog Carousel
+   - Smooth cubic-bezier arc glide, circular infinite loop, drag-to-scrub with
+     momentum fling, idle sine float, feathered radial reveal, hollow index
+     counter swap, autoplay toggle, filter support & 2-way dial sync.
+   ========================================================================== */
+
+function createStrideBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+  const sampleX = (t) => ((ax * t + bx) * t + cx) * t;
+  const sampleY = (t) => ((ay * t + by) * t + cy) * t;
+  const sampleDX = (t) => (3 * ax * t + 2 * bx) * t + cx;
+
+  return function (x) {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 6; i++) {
+      const err = sampleX(t) - x;
+      if (Math.abs(err) < 1e-5) break;
+      const d = sampleDX(t);
+      if (Math.abs(d) < 1e-6) break;
+      t -= err / d;
+    }
+    return sampleY(dialClamp(t, 0, 1));
+  };
+}
+
+class StrideProjectCarousel {
+  constructor(stageEl) {
+    this.stage = stageEl;
+    this.track = stageEl.querySelector('#catalogStrideTrack');
+    this.revealEl = stageEl.querySelector('#catalogStrideReveal');
+    this.countEl = stageEl.querySelector('#catalogArcCount');
+    this.activeLabelEl = stageEl.querySelector('#catalogActiveLabel');
+    this.dotsWrap = stageEl.querySelector('#catalogArcDots');
+    this.prevBtn = stageEl.querySelector('#catalogArcPrev');
+    this.nextBtn = stageEl.querySelector('#catalogArcNext');
+    this.autoBtn = stageEl.querySelector('#catalogAutoBtn');
+
+    this.allCards = Array.from(this.track ? this.track.querySelectorAll('.catalog-row-card') : []);
+    this.visibleCards = this.allCards.slice();
+    if (!this.track || !this.allCards.length) return;
+
+    this.glideEase = createStrideBezier(0.25, 0.75, 0.2, 1);
+    this.GLIDE_MS = 650;
+    this.REVEAL_MS = 420;
+    this.AUTO_MS = 3800;
+
+    this.projectAccents = {
+      smartfarm: 'radial-gradient(ellipse 72% 65% at 50% 52%, rgba(225, 29, 72, 0.28) 0%, rgba(16, 185, 129, 0.1) 52%, transparent 80%)',
+      itacademy: 'radial-gradient(ellipse 72% 65% at 50% 52%, rgba(225, 29, 72, 0.26) 0%, rgba(56, 189, 248, 0.14) 52%, transparent 80%)',
+      smartdetect: 'radial-gradient(ellipse 72% 65% at 50% 52%, rgba(255, 45, 85, 0.28) 0%, rgba(245, 158, 11, 0.12) 52%, transparent 80%)',
+      bloompetal: 'radial-gradient(ellipse 72% 65% at 50% 52%, rgba(244, 63, 94, 0.3) 0%, rgba(192, 132, 252, 0.14) 52%, transparent 80%)'
+    };
+
+    // Motion state
+    this.pos = 0;
+    this.activeIdx = 0;
+    this.glide = null;
+    this.revealAnim = null;
+    this.countTimer = null;
+
+    // Drag & interaction state
+    this.isDragging = false;
+    this.dragStarted = false;
+    this.dragPointerId = null;
+    this.dragStartX = 0;
+    this.dragStartPos = 0;
+    this.dragLastX = 0;
+    this.dragLastT = 0;
+    this.dragVel = 0;
+    this.suppressClickUntil = 0;
+
+    // Hover 3D tilt & poke state (center card)
+    this.isFinePointer = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    this.isHoveringStage = false;
+    this.tiltTargetX = 0;
+    this.tiltTargetY = 0;
+    this.tiltX = 0;
+    this.tiltY = 0;
+    this.pokeAnim = null;
+
+    // Autoplay & viewport visibility
+    this.isAutoPlaying = true;
+    this.isVisible = true;
+    this.lastAutoTick = performance.now();
+
+    this.stageW = this.stage.clientWidth || 960;
+    this.buildDots();
+    this.bindEvents();
+    this.updateHUD(0, true);
+    this.layoutCards(performance.now());
+    this.startLoop();
+  }
+
+  getSlotStep() {
+    const w = this.stageW || this.stage.clientWidth || 960;
+    if (w < 540) return Math.max(255, w * 0.84);
+    if (w < 860) return Math.max(300, w * 0.56);
+    return Math.min(418, Math.max(330, w * 0.38));
+  }
+
+  sampleArc(rel) {
+    const step = this.getSlotStep();
+    const isNarrow = (this.stageW || 960) < 600;
+    const slots = [
+      { dx: 0, dy: 0, rz: 0, ry: 0, sc: 1.0, op: 1.0 },
+      { dx: step, dy: isNarrow ? 22 : 30, rz: isNarrow ? 3.5 : 4.8, ry: isNarrow ? 12 : 16, sc: isNarrow ? 0.86 : 0.88, op: isNarrow ? 0.45 : 0.78 },
+      { dx: step * 1.84, dy: isNarrow ? 54 : 74, rz: 9.2, ry: 26, sc: 0.74, op: isNarrow ? 0.0 : 0.34 },
+      { dx: step * 2.52, dy: 118, rz: 13.5, ry: 34, sc: 0.62, op: 0 }
+    ];
+
+    const absR = Math.abs(rel);
+    const sign = rel < 0 ? -1 : 1;
+    const clamped = Math.min(absR, slots.length - 1);
+    const i0 = Math.floor(clamped);
+    const i1 = Math.min(slots.length - 1, i0 + 1);
+    const f = clamped - i0;
+    const a = slots[i0];
+    const b = slots[i1];
+
+    return {
+      dx: (a.dx + (b.dx - a.dx) * f) * sign,
+      dy: a.dy + (b.dy - a.dy) * f,
+      rz: (a.rz + (b.rz - a.rz) * f) * sign,
+      ry: (a.ry + (b.ry - a.ry) * f) * -sign,
+      sc: a.sc + (b.sc - a.sc) * f,
+      op: a.op + (b.op - a.op) * f
+    };
+  }
+
+  wrapIndex(idx) {
+    const n = this.visibleCards.length;
+    if (!n) return 0;
+    return ((idx % n) + n) % n;
+  }
+
+  relativeOffset(cardIdx, posVal) {
+    const n = this.visibleCards.length;
+    if (n <= 1) return 0;
+    if (n === 2) {
+      return cardIdx - posVal;
+    }
+    let d = ((cardIdx - posVal) % n + n) % n;
+    if (d > n / 2) d -= n;
+    return d;
+  }
+
+  buildDots() {
+    if (!this.dotsWrap) return;
+    this.dotsWrap.innerHTML = '';
+    this.dots = this.visibleCards.map((card, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'stride-dot' + (i === this.activeIdx ? ' active' : '');
+      const titleEl = card.querySelector('.project-title');
+      btn.setAttribute('aria-label', titleEl ? titleEl.textContent.trim() : `ผลงาน ${i + 1}`);
+      btn.setAttribute('aria-selected', i === this.activeIdx ? 'true' : 'false');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.goTo(i);
+      });
+      this.dotsWrap.appendChild(btn);
+      return btn;
+    });
+  }
+
+  triggerRevealWash(projId) {
+    if (!this.revealEl) return;
+    const grad = this.projectAccents[projId] || this.projectAccents.smartfarm;
+    this.revealEl.style.background = grad;
+    this.revealAnim = {
+      start: performance.now(),
+      dur: this.REVEAL_MS
+    };
+  }
+
+  animateCounter(nextNumStr, instant = false) {
+    if (!this.countEl) return;
+    clearTimeout(this.countTimer);
+    if (instant || this.countEl.textContent === nextNumStr) {
+      this.countEl.textContent = nextNumStr;
+      this.countEl.classList.remove('is-out', 'is-prep');
+      return;
+    }
+    this.countEl.classList.add('is-out');
+    this.countTimer = setTimeout(() => {
+      this.countEl.classList.remove('is-out');
+      this.countEl.classList.add('is-prep');
+      this.countEl.textContent = nextNumStr;
+      void this.countEl.offsetHeight;
+      this.countEl.classList.remove('is-prep');
+    }, 150);
+  }
+
+  updateHUD(idx, instant = false) {
+    const n = this.visibleCards.length;
+    if (!n) return;
+    const safeIdx = this.wrapIndex(idx);
+    const activeCard = this.visibleCards[safeIdx];
+    const numStr = String(safeIdx + 1).padStart(2, '0');
+    const totalStr = String(n).padStart(2, '0');
+
+    this.animateCounter(numStr, instant);
+
+    if (this.activeLabelEl && activeCard) {
+      const tagEl = activeCard.querySelector('.project-tag');
+      const tagTxt = tagEl ? tagEl.textContent.trim() : 'PROJECT';
+      this.activeLabelEl.textContent = `${numStr} / ${totalStr} · ${tagTxt}`;
+    }
+
+    if (this.dots && this.dots.length) {
+      this.dots.forEach((dot, i) => {
+        const isAct = i === safeIdx;
+        dot.classList.toggle('active', isAct);
+        dot.setAttribute('aria-selected', isAct ? 'true' : 'false');
+      });
+    }
+
+    this.visibleCards.forEach((card, i) => {
+      const isCenter = i === safeIdx;
+      card.classList.toggle('is-arc-center', isCenter);
+      card.classList.toggle('dial-selected', isCenter);
+    });
+
+    if (!instant && activeCard) {
+      const projId = activeCard.getAttribute('data-project-id');
+      this.triggerRevealWash(projId);
+    }
+  }
+
+  syncProjectsDial(activeCard) {
+    if (!activeCard || window.__projectSyncLock || !window.__projectsDial) return;
+    const projId = activeCard.getAttribute('data-project-id');
+    const matchIdx = window.__projectsDial.items.findIndex(it => it.id === projId);
+    if (matchIdx !== -1 && window.__projectsDial.activeIdx !== matchIdx) {
+      window.__projectSyncLock = true;
+      window.__projectsDial.goTo(matchIdx);
+      window.__projectSyncLock = false;
+    }
+  }
+
+  goTo(targetIdx, opts = {}) {
+    const n = this.visibleCards.length;
+    if (!n) return;
+
+    const from = this.pos;
+    let to;
+    let nextActive;
+
+    if (n === 1) {
+      to = 0;
+      nextActive = 0;
+    } else if (n === 2) {
+      nextActive = ((targetIdx % 2) + 2) % 2;
+      to = nextActive;
+    } else {
+      nextActive = this.wrapIndex(targetIdx);
+      let delta = ((nextActive - from) % n + n) % n;
+      if (delta > n / 2) delta -= n;
+      if (opts.forceDir === 1 && delta <= 0) delta += n;
+      if (opts.forceDir === -1 && delta >= 0) delta -= n;
+      to = from + delta;
+    }
+
+    this.lastAutoTick = performance.now();
+    this.activeIdx = nextActive;
+    this.glide = {
+      from,
+      to,
+      start: performance.now(),
+      dur: opts.instant ? 0 : this.GLIDE_MS
+    };
+
+    if (opts.instant) {
+      this.pos = to;
+      this.glide = null;
+    }
+
+    this.updateHUD(nextActive, Boolean(opts.instant));
+
+    if (!opts.fromDial && !opts.silent) {
+      playMechanicalRelaySound('snap');
+    }
+    if (!opts.fromDial) {
+      this.syncProjectsDial(this.visibleCards[nextActive]);
+    }
+  }
+
+  step(delta) {
+    const n = this.visibleCards.length;
+    if (n <= 1) return;
+    if (n === 2) {
+      this.goTo(this.activeIdx === 0 ? 1 : 0);
+      return;
+    }
+    this.goTo(this.activeIdx + delta, { forceDir: delta > 0 ? 1 : -1 });
+  }
+
+  goToProjectId(projId, opts = {}) {
+    const idx = this.visibleCards.findIndex(c => c.getAttribute('data-project-id') === projId);
+    if (idx === -1) return;
+    if (idx === this.activeIdx && !this.glide) return;
+    this.goTo(idx, opts);
+  }
+
+  setFilter(category) {
+    this.visibleCards = category === 'all'
+      ? this.allCards.slice()
+      : this.allCards.filter(card => card.getAttribute('data-category') === category);
+
+    this.allCards.forEach(card => {
+      if (!this.visibleCards.includes(card)) {
+        card.classList.remove('is-arc-center', 'dial-selected');
       }
     });
-  });
+
+    this.glide = null;
+    this.pos = 0;
+    this.activeIdx = 0;
+    this.lastAutoTick = performance.now();
+    this.buildDots();
+    this.updateHUD(0, true);
+    this.layoutCards(performance.now());
+  }
+
+  triggerCenterPoke() {
+    this.pokeAnim = {
+      start: performance.now(),
+      dur: 340
+    };
+  }
+
+  bindEvents() {
+    if (this.prevBtn) {
+      this.prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.step(-1);
+      });
+    }
+
+    if (this.nextBtn) {
+      this.nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.step(1);
+      });
+    }
+
+    if (this.autoBtn) {
+      this.autoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.isAutoPlaying = !this.isAutoPlaying;
+        this.autoBtn.classList.toggle('is-playing', this.isAutoPlaying);
+        this.autoBtn.setAttribute('aria-pressed', this.isAutoPlaying ? 'true' : 'false');
+        this.lastAutoTick = performance.now();
+        playMechanicalRelaySound('snap');
+      });
+    }
+
+    // Keyboard navigation when carousel is focused
+    this.stage.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.step(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.step(-1);
+      }
+    });
+
+    // Click side cards to glide smoothly to center; click center body for Stride spring poke
+    this.allCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (performance.now() < this.suppressClickUntil) {
+          e.preventDefault();
+          return;
+        }
+        if (e.target.closest('button, a, .xray-card-preview')) return;
+
+        const visIdx = this.visibleCards.indexOf(card);
+        if (visIdx === -1) return;
+
+        if (visIdx !== this.activeIdx) {
+          this.goTo(visIdx);
+        } else {
+          this.triggerCenterPoke();
+          playMechanicalRelaySound('snap');
+        }
+      });
+    });
+
+    // Pointer hover tilt & autoplay pause on hover
+    this.stage.addEventListener('pointerenter', () => {
+      this.isHoveringStage = true;
+    });
+
+    this.stage.addEventListener('pointerleave', () => {
+      this.isHoveringStage = false;
+      this.tiltTargetX = 0;
+      this.tiltTargetY = 0;
+      this.lastAutoTick = performance.now();
+    });
+
+    if (this.isFinePointer) {
+      this.stage.addEventListener('pointermove', (e) => {
+        if (this.isDragging) return;
+        const centerCard = this.visibleCards[this.activeIdx];
+        if (!centerCard) return;
+
+        // Keep X-Ray Spotlight steady when pointer is inspecting Smart Farm PCB
+        if (e.target.closest && e.target.closest('.xray-card-preview')) {
+          this.tiltTargetX = 0;
+          this.tiltTargetY = 0;
+          return;
+        }
+
+        const rect = centerCard.getBoundingClientRect();
+        if (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        ) {
+          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+          this.tiltTargetX = dialClamp(-ny * 5.5, -5.5, 5.5);
+          this.tiltTargetY = dialClamp(nx * 5.5, -5.5, 5.5);
+          centerCard.style.setProperty('--card-x', `${(e.clientX - rect.left).toFixed(1)}px`);
+          centerCard.style.setProperty('--card-y', `${(e.clientY - rect.top).toFixed(1)}px`);
+        } else {
+          this.tiltTargetX = 0;
+          this.tiltTargetY = 0;
+        }
+      });
+    }
+
+    // Horizontal Drag-to-Scrub with Velocity Momentum Fling (Stride signature mechanic)
+    this.stage.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      if (e.target.closest('button, a, .xray-card-preview, .stride-controls-dock, .stride-hud-top')) return;
+      if (this.visibleCards.length <= 1) return;
+
+      this.isDragging = true;
+      this.dragStarted = false;
+      this.dragPointerId = e.pointerId;
+      this.dragStartX = e.clientX;
+      this.dragStartPos = this.pos;
+      this.dragLastX = e.clientX;
+      this.dragLastT = performance.now();
+      this.dragVel = 0;
+      this.glide = null;
+    });
+
+    this.stage.addEventListener('pointermove', (e) => {
+      if (!this.isDragging || e.pointerId !== this.dragPointerId) return;
+      const dx = e.clientX - this.dragStartX;
+      if (!this.dragStarted && Math.abs(dx) > 6) {
+        this.dragStarted = true;
+        this.stage.classList.add('is-dragging');
+        this.tiltTargetX = 0;
+        this.tiltTargetY = 0;
+        try { this.stage.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      if (!this.dragStarted) return;
+
+      const stepPx = this.getSlotStep();
+      const now = performance.now();
+      const dt = Math.max(8, now - this.dragLastT);
+      const rawPos = this.dragStartPos - dx / stepPx;
+
+      const nextPos = this.visibleCards.length === 2
+        ? dialClamp(rawPos, -0.35, 1.35)
+        : rawPos;
+
+      const instVel = -(e.clientX - this.dragLastX) / stepPx / dt;
+      this.dragVel = this.dragVel * 0.65 + instVel * 0.35;
+      this.pos = nextPos;
+      this.dragLastX = e.clientX;
+      this.dragLastT = now;
+    });
+
+    const finishDrag = (e) => {
+      if (!this.isDragging || (e && e.pointerId !== this.dragPointerId)) return;
+      const wasDragged = this.dragStarted;
+      this.isDragging = false;
+      this.dragStarted = false;
+      this.stage.classList.remove('is-dragging');
+
+      if (wasDragged) {
+        this.suppressClickUntil = performance.now() + 180;
+        try {
+          if (this.stage.hasPointerCapture(this.dragPointerId)) {
+            this.stage.releasePointerCapture(this.dragPointerId);
+          }
+        } catch (err) {}
+
+        const n = this.visibleCards.length;
+        const fling = dialClamp(this.dragVel * 220, -1.6, 1.6);
+        const projected = Math.round(this.pos + fling);
+
+        if (n === 2) {
+          this.goTo(dialClamp(projected, 0, 1));
+        } else {
+          this.goTo(projected);
+        }
+      }
+      this.dragPointerId = null;
+    };
+
+    this.stage.addEventListener('pointerup', finishDrag);
+    this.stage.addEventListener('pointercancel', finishDrag);
+
+    // Resize & IntersectionObserver
+    window.addEventListener('resize', () => {
+      this.stageW = this.stage.clientWidth || 960;
+    }, { passive: true });
+
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        this.isVisible = entries[0].isIntersecting;
+        if (this.isVisible) {
+          this.lastAutoTick = performance.now();
+        }
+      }, { threshold: 0.12 });
+      obs.observe(this.stage);
+    }
+  }
+
+  layoutCards(now) {
+    const n = this.visibleCards.length;
+    if (!n) return;
+
+    const floatAmp = this.dragStarted ? 0 : 1;
+
+    // Center card spring squash/stretch poke factor
+    let pokeSx = 1;
+    let pokeSy = 1;
+    if (this.pokeAnim) {
+      const p = (now - this.pokeAnim.start) / this.pokeAnim.dur;
+      if (p >= 1) {
+        this.pokeAnim = null;
+      } else if (p < 0.32) {
+        const k = p / 0.32;
+        pokeSx = 1 + 0.045 * Math.sin(k * Math.PI * 0.5);
+        pokeSy = 1 - 0.045 * Math.sin(k * Math.PI * 0.5);
+      } else if (p < 0.68) {
+        const k = (p - 0.32) / 0.36;
+        pokeSx = 1.045 - 0.065 * k;
+        pokeSy = 0.955 + 0.07 * k;
+      } else {
+        const k = (p - 0.68) / 0.32;
+        pokeSx = 0.98 + 0.02 * k;
+        pokeSy = 1.025 - 0.025 * k;
+      }
+    }
+
+    for (let i = 0; i < n; i++) {
+      const card = this.visibleCards[i];
+      const rel = this.relativeOffset(i, this.pos);
+      const slot = this.sampleArc(rel);
+      const absR = Math.abs(rel);
+
+      // Gentle Stride sine wave bobbing
+      const bobY = Math.sin((now / 4600) * Math.PI * 2 + 1.37 * i) * 5.8 * floatAmp;
+      const bobRz = Math.sin((now / 4600) * Math.PI * 2 + 1.37 * i + 1.1) * 0.55 * floatAmp;
+
+      const isCenter = i === this.activeIdx && absR < 0.45;
+      const rx = isCenter ? this.tiltX : 0;
+      const ry = slot.ry + (isCenter ? this.tiltY : 0);
+      const sx = slot.sc * (isCenter ? pokeSx : 1);
+      const sy = slot.sc * (isCenter ? pokeSy : 1);
+
+      const tx = slot.dx.toFixed(2);
+      const ty = (slot.dy + bobY).toFixed(2);
+      const rz = (slot.rz + bobRz).toFixed(2);
+
+      card.style.transform =
+        `translate3d(calc(-50% + ${tx}px), calc(-50% + ${ty}px), 0) ` +
+        `rotateZ(${rz}deg) rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) ` +
+        `scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
+
+      card.style.opacity = slot.op.toFixed(3);
+      card.style.zIndex = String(Math.round(40 - absR * 12));
+      card.style.pointerEvents = slot.op > 0.08 ? 'auto' : 'none';
+    }
+  }
+
+  updateRevealWash(now) {
+    if (!this.revealAnim || !this.revealEl) return;
+    const p = dialClamp((now - this.revealAnim.start) / this.revealAnim.dur, 0, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const maxR = Math.hypot(this.stageW || 960, 560) * 0.72;
+    const r = eased * maxR;
+    const feather = Math.max(48, r * 0.32);
+    const maskVal = `radial-gradient(circle at 50% 52%, #000 ${Math.max(0, r - feather).toFixed(1)}px, transparent ${r.toFixed(1)}px)`;
+
+    this.revealEl.style.maskImage = maskVal;
+    this.revealEl.style.webkitMaskImage = maskVal;
+    this.revealEl.style.opacity = (Math.sin(p * Math.PI) * 0.92).toFixed(3);
+
+    if (p >= 1) {
+      this.revealAnim = null;
+      this.revealEl.style.opacity = '0';
+    }
+  }
+
+  startLoop() {
+    const tick = (now) => {
+      if (this.isVisible) {
+        // 1. Cubic-bezier glide tween
+        if (this.glide) {
+          const elapsed = now - this.glide.start;
+          const t = this.glide.dur > 0 ? dialClamp(elapsed / this.glide.dur, 0, 1) : 1;
+          const k = this.glideEase(t);
+          this.pos = this.glide.from + (this.glide.to - this.glide.from) * k;
+          if (t >= 1) {
+            this.pos = this.visibleCards.length === 2
+              ? dialClamp(Math.round(this.glide.to), 0, 1)
+              : this.wrapIndex(Math.round(this.glide.to));
+            this.glide = null;
+          }
+        }
+
+        // 2. Smooth 3D tilt lerp
+        this.tiltX += (this.tiltTargetX - this.tiltX) * 0.14;
+        this.tiltY += (this.tiltTargetY - this.tiltY) * 0.14;
+
+        // 3. Autoplay ticker (pauses while hovering, dragging, or gliding)
+        if (
+          this.isAutoPlaying &&
+          !this.isHoveringStage &&
+          !this.isDragging &&
+          !this.glide &&
+          this.visibleCards.length > 1 &&
+          now - this.lastAutoTick >= this.AUTO_MS
+        ) {
+          this.step(1);
+        }
+
+        // 4. Layout cards + feathered reveal wash
+        this.layoutCards(now);
+        this.updateRevealWash(now);
+      }
+
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+}
+
+function initStrideProjectCarousel() {
+  const stage = document.getElementById('catalogStrideStage');
+  if (!stage) return;
+  window.__catalogCarousel = new StrideProjectCarousel(stage);
 }
 
 /* ==========================================================================

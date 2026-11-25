@@ -404,12 +404,44 @@
           <div class="dial-hint">⟷ ลากวงแหวน · คลิกโมเดล · หรือคลิกรายการด้านล่างเพื่อหมุนดูรายละเอียด</div>
         </div>
 
-        <!-- Aperture Catalog Shelf Index + Smart Farm X-Ray Hardware Module -->
+        <!-- Aperture Catalog Shelf Index + Stride 3D Arc Carousel -->
         <div class="projects-catalog-shelf">
-          <div class="shelf-header-row">
-            <span class="shelf-eyebrow">ARCHIVE CATALOG · CLICK ITEM TO ROTATE DIAL</span>
-          </div>
-          <div class="projects-grid catalog-shelf-grid">
+          <div class="stride-carousel-stage" id="catalogStrideStage" tabindex="0" aria-label="Archive Catalog 3D Arc Carousel">
+            <!-- Feathered Circular Radial Accent Wash (Stride Inspired) -->
+            <div class="stride-reveal" id="catalogStrideReveal" aria-hidden="true"></div>
+            <!-- Concentric Backdrop Rings (Stride Inspired) -->
+            <div class="stride-rings" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <!-- Top HUD: Eyebrow, Autoplay Toggle & Giant Hollow Counter -->
+            <div class="stride-hud-top">
+              <div class="shelf-header-row">
+                <span class="shelf-eyebrow">ARCHIVE CATALOG · DRAG OR CLICK TO SLIDE</span>
+                <span class="stride-active-pill" id="catalogActiveLabel">01 / 04 · HARDWARE &amp; IOT</span>
+              </div>
+              <div class="stride-hud-right">
+                <button type="button" class="stride-auto-btn is-playing" id="catalogAutoBtn" aria-pressed="true" title="เปิด/ปิดการเลื่อนอัตโนมัติ">
+                  <span class="stride-auto-icon" aria-hidden="true">
+                    <svg class="icon-pause" viewBox="0 0 14 14" width="12" height="12" fill="currentColor">
+                      <rect x="2.5" y="2" width="3" height="10" rx="1"></rect>
+                      <rect x="8.5" y="2" width="3" height="10" rx="1"></rect>
+                    </svg>
+                    <svg class="icon-play" viewBox="0 0 14 14" width="12" height="12" fill="currentColor">
+                      <path d="M3.5 2.2 L11.8 7 L3.5 11.8 Z"></path>
+                    </svg>
+                  </span>
+                  <span class="stride-auto-text">AUTO</span>
+                </button>
+                <div class="stride-count-wrap" aria-live="polite" aria-label="ลำดับผลงานที่แสดง">
+                  <span class="stride-count" id="catalogArcCount">01</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="projects-grid catalog-shelf-grid stride-arc-track" id="catalogStrideTrack">
             <!-- Project 1 (IoT & Hardware + X-Ray Spotlight) -->
             <article class="project-card catalog-row-card" data-category="iot" data-project-id="smartfarm" data-dial-index="0" data-card-hover>
               <div class="reticle" aria-hidden="true">
@@ -590,6 +622,29 @@ void loop() {
                 </button>
               </div>
             </article>
+            </div>
+
+            <!-- Stride Controls Dock: Prev, Dots, Circular Signature Next Arrow -->
+            <div class="stride-controls-dock">
+              <div class="stride-nav-row">
+                <button type="button" class="stride-arrow-btn stride-prev-btn" id="catalogArcPrev" aria-label="การ์ดผลงานก่อนหน้า" title="ผลงานก่อนหน้า">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="11 18 5 12 11 6"></polyline>
+                  </svg>
+                </button>
+
+                <div class="stride-dots" id="catalogArcDots" role="tablist" aria-label="เลือกการ์ดผลงาน"></div>
+
+                <button type="button" class="stride-arrow-btn stride-next-btn" id="catalogArcNext" aria-label="การ์ดผลงานถัดไป" title="เลื่อนการ์ดถัดไป">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="13 6 19 12 13 18"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="stride-drag-hint">⟷ ลากการ์ดซ้าย-ขวา · คลิกการ์ดด้านข้างเพื่อเลื่อนโค้ง · หรือกดลูกศร</div>
+            </div>
           </div>
         </div>
       </section>
